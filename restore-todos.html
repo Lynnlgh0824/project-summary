@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔙 待办清单智能恢复工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        .step {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .step h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: #52c41a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #73d13d;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .result {
+            background: #f0f5ff;
+            border: 2px solid #adc6ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-size: 13px;
+        }
+        .success {
+            background: #f6ffed;
+            border-color: #b7eb8f;
+            color: #52c41a;
+        }
+        .error {
+            background: #fff2f0;
+            border-color: #ffccc7;
+            color: #ff4d4f;
+        }
+        .todo-item {
+            background: white;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .todo-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .selected-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔙 待办清单智能恢复工具</h1>
+        <p class="subtitle">从浏览器本地存储或工作日志中恢复您的待办事项</p>
+
+        <!-- 方法1：从 localStorage 恢复 -->
+        <div class="step">
+            <h3><span class="step-number">1</span> 从浏览器存储恢复</h3>
+            <p style="color: #666; margin-bottom: 15px;">点击按钮检查浏览器中是否还有待办数据残留</p>
+            <button class="btn-primary" onclick="checkLocalStorage()">🔍 检查浏览器数据</button>
+            <div id="localResult"></div>
+        </div>
+
+        <!-- 方法2：从工作日志提取 -->
+        <div class="step">
+            <h3><span class="step-number">2</span> 从工作日志智能提取</h3>
+            <p style="color: #666; margin-bottom: 15px;">将今天或昨天的工作日志内容粘贴到这里，系统会自动提取待办事项</p>
+            <textarea id="logContent" placeholder="粘贴工作日志内容，例如：
+- 待办：修复登录bug
+- 继续优化首页性能
+- TODO: 添加用户反馈功能
+..."></textarea>
+            <div style="margin-top: 10px;">
+                <button class="btn-primary" onclick="extractFromLog()">🧠 智能提取待办</button>
+                <button class="btn-success" onclick="applyExtractedTodos()">✅ 应用提取的待办</button>
+                <span id="selectedCount" class="selected-count" style="display: none;">已选择 0 项</span>
+            </div>
+            <div id="extractResult"></div>
+        </div>
+
+        <!-- 方法3：手动输入 -->
+        <div class="step">
+            <h3><span class="step-number">3</span> 手动输入恢复</h3>
+            <p style="color: #666; margin-bottom: 15px;">如果您记得丢失的待办事项，可以直接输入</p>
+            <textarea id="manualTodos" placeholder="每行一个待办事项，例如：
+修复登录bug
+优化首页加载速度
+添加用户反馈功能"></textarea>
+            <div style="margin-top: 10px;">
+                <button class="btn-success" onclick="applyManualTodos()">✅ 恢复手动输入的待办</button>
+            </div>
+        </div>
+
+        <!-- 方法4：从备份文件 -->
+        <div class="step">
+            <h3><span class="step-number">4</span> 从备份文件恢复</h3>
+            <p style="color: #666; margin-bottom: 15px;">如果您之前导出过备份文件，可以直接导入</p>
+            <button class="btn-primary" onclick="importBackup()">📁 选择备份文件</button>
+            <div id="importResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const TODOS_KEY = 'project_todos';
+        const PROJECTS_KEY = 'project_list';
+        let extractedTodos = [];
+
+        // 从 localStorage 恢复
+        function checkLocalStorage() {
+            const resultDiv = document.getElementById('localResult');
+
+            // 检查所有可能的键名
+            const possibleKeys = [
+                'project_todos',
+                'todos',
+                'todo_list',
+                'my_todos',
+                'tasks',
+                'project_tasks'
+            ];
+
+            let found = false;
+            let output = '<div class="result success">';
+
+            for (const key of possibleKeys) {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        const count = typeof parsed === 'object' ?
+                            Object.values(parsed).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0) :
+                            Array.isArray(parsed) ? parsed.length : 1;
+
+                        output += `✅ 找到数据键: <strong>${key}</strong> (${count} 项待办)\n\n`;
+                        output += JSON.stringify(parsed, null, 2);
+
+                        // 自动恢复到正确的键
+                        localStorage.setItem(TODOS_KEY, data);
+                        found = true;
+                    } catch (e) {
+                        // 忽略解析错误
+                    }
+                }
+            }
+
+            if (!found) {
+                resultDiv.innerHTML = '<div class="result error">❌ 未在浏览器中找到待办清单数据<br><br>可能的原因：<br>- 浏览器缓存被清空<br>- 使用了隐私模式<br>- 换了浏览器</div>';
+                return;
+            }
+
+            output += '\n\n✅ 已自动恢复数据！请刷新主页面查看。</div>';
+            resultDiv.innerHTML = output;
+        }
+
+        // 从日志提取待办
+        function extractFromLog() {
+            const logContent = document.getElementById('logContent').value;
+            const resultDiv = document.getElementById('extractResult');
+
+            if (!logContent.trim()) {
+                resultDiv.innerHTML = '<div class="result error">❌ 请先粘贴工作日志内容</div>';
+                return;
+            }
+
+            // 待办关键词
+            const todoKeywords = [
+                '待办', '待做', '未完成', 'TODO', 'todo', '待完成',
+                '需要', '继续', '还要', '记得', '别忘了', 'remind',
+                'fix', '修复', '添加', '优化', '实现'
+            ];
+
+            const lines = logContent.split('\n');
+            extractedTodos = [];
+
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine || trimmedLine.startsWith('//') || trimmedLine.startsWith('#')) {
+                    continue;
+                }
+
+                // 检查是否包含待办关键词
+                const hasKeyword = todoKeywords.some(keyword =>
+                    trimmedLine.toLowerCase().includes(keyword.toLowerCase())
+                );
+
+                if (hasKeyword) {
+                    let text = trimmedLine;
+
+                    // 移除常见的标记符号
+                    text = text.replace(/^[-*•+]\s*/, '');
+                    text = text.replace(/^(\d+)[.、]\s*/, '');
+                    text = text.replace(/^(待办|TODO|todo|待做|fix):\s*/i, '');
+                    text = text.replace(/^\[([ x])\]\s*/, '');
+                    text = text.trim();
+
+                    if (text.length > 0) {
+                        extractedTodos.push({
+                            text: text,
+                            priority: 'medium',
+                            status: 'pending',
+                            dueDate: null
+                        });
+                    }
+                }
+            }
+
+            if (extractedTodos.length === 0) {
+                resultDiv.innerHTML = '<div class="result error">❌ 未在日志中找到待办事项<br><br>提示：确保日志包含"待办"、"未完成"、"需要"、"继续"等关键词</div>';
+                return;
+            }
+
+            // 显示提取的待办
+            let html = '<div class="result success">✅ 提取到 ' + extractedTodos.length + ' 个待办事项：<br><br>';
+            html += '<div style="margin-top: 10px;">';
+
+            extractedTodos.forEach((todo, index) => {
+                html += `
+                    <div class="todo-item">
+                        <input type="checkbox" id="todo_${index}" checked>
+                        <label for="todo_${index}" style="flex: 1; cursor: pointer;">${escapeHtml(todo.text)}</label>
+                    </div>
+                `;
+            });
+
+            html += '</div></div>';
+            resultDiv.innerHTML = html;
+
+            // 更新计数
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('#extractResult input[type="checkbox"]');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const countSpan = document.getElementById('selectedCount');
+
+            if (checked > 0) {
+                countSpan.textContent = `已选择 ${checked} 项`;
+                countSpan.style.display = 'inline-block';
+            } else {
+                countSpan.style.display = 'none';
+            }
+        }
+
+        // 应用提取的待办
+        function applyExtractedTodos() {
+            if (extractedTodos.length === 0) {
+                alert('请先提取待办事项');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('#extractResult input[type="checkbox"]');
+            const selectedTodos = [];
+
+            extractedTodos.forEach((todo, index) => {
+                if (checkboxes[index] && checkboxes[index].checked) {
+                    selectedTodos.push(todo);
+                }
+            });
+
+            if (selectedTodos.length === 0) {
+                alert('请至少选择一个待办事项');
+                return;
+            }
+
+            // 获取当前项目
+            const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]');
+            if (projects.length === 0) {
+                alert('错误：找不到项目列表');
+                return;
+            }
+
+            // 使用第一个项目
+            const projectId = projects[0].id;
+
+            // 读取现有待办
+            const todos = JSON.parse(localStorage.getItem(TODOS_KEY) || '{}');
+            if (!todos[projectId]) {
+                todos[projectId] = [];
+            }
+
+            // 添加新待办
+            const now = Date.now();
+            selectedTodos.forEach(todo => {
+                todos[projectId].push({
+                    ...todo,
+                    id: `todo_${now}_${Math.random().toString(36).substr(2, 9)}`,
+                    createdAt: new Date().toISOString()
+                });
+            });
+
+            // 保存
+            localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+
+            alert(`✅ 成功恢复 ${selectedTodos.length} 个待办事项！\n\n请刷新主页面查看。`);
+        }
+
+        // 手动输入恢复
+        function applyManualTodos() {
+            const text = document.getElementById('manualTodos').value.trim();
+
+            if (!text) {
+                alert('请输入待办事项');
+                return;
+            }
+
+            const lines = text.split('\n').filter(line => line.trim());
+
+            if (lines.length === 0) {
+                alert('请输入至少一个待办事项');
+                return;
+            }
+
+            const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]');
+            if (projects.length === 0) {
+                alert('错误：找不到项目列表');
+                return;
+            }
+
+            const projectId = projects[0].id;
+            const todos = JSON.parse(localStorage.getItem(TODOS_KEY) || '{}');
+
+            if (!todos[projectId]) {
+                todos[projectId] = [];
+            }
+
+            const now = Date.now();
+            lines.forEach(line => {
+                todos[projectId].push({
+                    id: `todo_${now}_${Math.random().toString(36).substr(2, 9)}`,
+                    text: line.trim(),
+                    priority: 'medium',
+                    status: 'pending',
+                    dueDate: null,
+                    createdAt: new Date().toISOString()
+                });
+            });
+
+            localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+
+            alert(`✅ 成功恢复 ${lines.length} 个待办事项！\n\n请刷新主页面查看。`);
+            document.getElementById('manualTodos').value = '';
+        }
+
+        // 导入备份
+        async function importBackup() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+
+                    if (data.todos) {
+                        localStorage.setItem(TODOS_KEY, JSON.stringify(data.todos));
+                        document.getElementById('importResult').innerHTML =
+                            '<div class="result success">✅ 已从备份文件恢复待办清单！<br>请刷新主页面查看。</div>';
+                    } else {
+                        document.getElementById('importResult').innerHTML =
+                            '<div class="result error">❌ 备份文件中没有待办清单数据</div>';
+                    }
+                } catch (err) {
+                    document.getElementById('importResult').innerHTML =
+                        '<div class="result error">❌ 文件格式错误：' + err.message + '</div>';
+                }
+            };
+            input.click();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 监听复选框变化
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('#extractResult input[type="checkbox"]')) {
+                updateSelectedCount();
+            }
+        });
+    </script>
+</body>
+</html>

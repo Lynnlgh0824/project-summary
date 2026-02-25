@@ -912,6 +912,7 @@
             </div>
             <div class="header-controls">
                 <button class="btn btn-success" onclick="refreshAllData()">🔄 刷新数据</button>
+                <button class="btn btn-warning" onclick="showProjectStartModal()">📋 启动脚本</button>
                 <button class="btn btn-primary" onclick="autoGenerateTodayLog()">🤖 智能生成</button>
                 <button class="btn btn-primary" onclick="showAddForm()">➕ 添加日志</button>
             </div>
@@ -1061,7 +1062,14 @@
                     ],
                     docs: []
                 },
-                folder: '/Users/yuzhoudeshengyin/Documents/my_project/project summary/'
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/project summary/',
+                paths: {
+                    claude: 'CLAUDE.md',
+                    readme: 'README.md',
+                    memory: 'memory/',
+                    docs: 'docs/',
+                    src: 'src/'
+                }
             },
             'english-learning-tts': {
                 summary: {
@@ -1099,7 +1107,15 @@
                         { name: '📄 页面公共功能', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/scripts/page-common.js', category: 'script' }
                     ]
                 },
-                folder: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/'
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/',
+                paths: {
+                    claude: 'CLAUDE.md',
+                    readme: 'README.md',
+                    memory: 'docs/',
+                    docs: 'docs/',
+                    src: 'scripts/',
+                    tests: 'archives/test-files/'
+                }
             },
             'aisaas-video': {
                 summary: {
@@ -1116,7 +1132,15 @@
                         { name: '📺 SaaS产品案例', url: 'https://www.producthunt.com/', category: 'learning' }
                     ]
                 },
-                folder: '/Users/yuzhoudeshengyin/Desktop/AI相关项目/' },
+                folder: '/Users/yuzhoudeshengyin/Desktop/AI相关项目/',
+                paths: {
+                    claude: 'CLAUDE.md',
+                    readme: 'README.md',
+                    memory: 'memory/',
+                    docs: 'docs/',
+                    src: 'src/'
+                }
+            },
             'clawdbot-railway': {
                 summary: {
                     title: '🤖 Clawdbot',
@@ -1129,7 +1153,14 @@
                     docs: []
                 },
                 folder: '/Users/yuzhoudeshengyin/Desktop/',
-                projectFolder: '/Users/yuzhoudeshengyin/Documents/my_project/clawdbot-railway/'
+                projectFolder: '/Users/yuzhoudeshengyin/Documents/my_project/clawdbot-railway/',
+                paths: {
+                    claude: 'CLAUDE.md',
+                    readme: 'README.md',
+                    memory: 'memory/',
+                    docs: 'docs/',
+                    src: 'src/'
+                }
             },
             'chiang-mai-activities': {
                 summary: {
@@ -1159,7 +1190,15 @@
                 },
                 folder: '/Users/yuzhoudeshengyin/Desktop/AI相关项目/清迈活动/',
                 projectFolder: '/Users/yuzhoudeshengyin/Documents/my_project/Chiengmai/',
-                serverPort: 8001
+                serverPort: 8001,
+                paths: {
+                    claude: 'CLAUDE.md',
+                    readme: 'README.md',
+                    memory: 'public/data/',
+                    docs: 'docs/',
+                    src: 'public/',
+                    tests: 'tests/'
+                }
             },
             'planning-system': {
                 summary: {
@@ -1174,7 +1213,14 @@
                         { name: '📖 Planning使用指南', url: '/Users/yuzhoudeshengyin/Documents/my_project/Planning-with-Files-使用指南.md', category: 'docs' }
                     ]
                 },
-                folder: '/Users/yuzhoudeshengyin/Documents/my_project/'
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/',
+                paths: {
+                    claude: 'CLAUDE.md',
+                    readme: 'README.md',
+                    memory: 'memory/',
+                    docs: 'docs/',
+                    src: 'src/'
+                }
             },
             'skills-development': {
                 summary: {
@@ -1222,7 +1268,14 @@
                 },
                 skills: '/Users/yuzhoudeshyin/.claude/skills/',
                 desktop: '/Users/yuzhoudeshengyin/Desktop/',
-                folder: '/Users/yuzhoudeshengyin/Documents/my_project/skills/'
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/skills/',
+                paths: {
+                    claude: 'README.md',
+                    readme: 'README.md',
+                    memory: 'docs/',
+                    docs: 'docs/',
+                    src: 'bili-audio-downloader/'
+                }
             }
         };
 
@@ -4087,13 +4140,16 @@ async function autoSaveToFile(logs) {
                 projectLogStatus[project.id] = hasTodayLog;
             });
 
-            // 如果所有项目都没有今天的日志，创建自动填充提示
+            // 如果所有项目都没有今天的日志，自动创建（零点任务）
             const allEmpty = Object.values(projectLogStatus).every(status => !status);
             if (allEmpty) {
-                // 显示自动填充提示（仅第一次）
-                if (!sessionStorage.getItem('autoFillShown_' + today)) {
-                    showAutoFillPrompt(projects);
-                    sessionStorage.setItem('autoFillShown_' + today, 'true');
+                // 检查是否已自动创建过
+                const autoCreatedKey = 'autoCreated_' + today;
+                if (!localStorage.getItem(autoCreatedKey)) {
+                    // 直接自动创建今日日志
+                    autoFillTodayLogs();
+                    localStorage.setItem(autoCreatedKey, 'true');
+                    console.log('✅ 零点自动任务：已创建今日日志');
                 }
             }
 
@@ -4665,6 +4721,540 @@ async function autoSaveToFile(logs) {
                     </tbody>
                 </table>
             `;
+        }
+
+        // 生成项目启动模板
+        function generateProjectStartTemplate(project) {
+            const data = projectData[project.id];
+            if (!data) return 'ERROR: Project not found';
+
+            const projectName = project.name.replace(/^[^\s]+\s*/, '');
+
+            // 获取项目路径配置，如果未配置则使用默认值
+            const paths = data.paths || {
+                claude: 'CLAUDE.md',
+                readme: 'README.md',
+                memory: 'memory/',
+                docs: 'docs/',
+                src: 'src/'
+            };
+
+            return `You are resuming ${projectName} as its long-term engineering assistant.
+
+This is a persistent project. Your job is to fully restore context and continue development safely and consistently.
+
+Follow these steps EXACTLY and in order:
+
+--------------------------------------------------
+STEP 1 — LOAD PROJECT RULES
+--------------------------------------------------
+
+Read and internalize:
+
+- ${paths.claude}
+- ${paths.readme}
+
+These define your behavioral and structural constraints.
+
+You MUST follow them strictly.
+
+
+--------------------------------------------------
+STEP 2 — LOAD LONG-TERM MEMORY
+--------------------------------------------------
+
+Read ALL files in:
+
+${paths.memory}
+
+Especially:
+
+- ${paths.memory}project-memory.md
+- ${paths.memory}progress.md
+- ${paths.memory}decisions.md
+- ${paths.memory}bugs.md (if exists)
+
+These contain long-term project knowledge.
+
+
+--------------------------------------------------
+STEP 3 — LOAD ARCHITECTURE AND PRODUCT CONTEXT
+--------------------------------------------------
+
+Read ALL files in:
+
+${paths.docs}
+
+Especially:
+
+- ${paths.docs}architecture.md
+- ${paths.docs}product.md
+- ${paths.docs}api.md (if exists)
+
+
+--------------------------------------------------
+STEP 4 — ANALYZE CURRENT CODEBASE
+--------------------------------------------------
+
+Scan and understand:
+
+- ${paths.src}
+- modules
+- configs
+- system design
+- structure and patterns
+
+
+Understand:
+
+- what is implemented
+- what is incomplete
+- how components interact
+
+
+--------------------------------------------------
+STEP 5 — RESTORE FULL CONTEXT STATE
+--------------------------------------------------
+
+Build an internal mental model including:
+
+- project purpose
+- architecture
+- module responsibilities
+- completed features
+- pending features
+- known issues
+- constraints
+
+
+--------------------------------------------------
+STEP 6 — ENTER STRICT DEVELOPMENT MODE
+--------------------------------------------------
+
+You MUST follow these rules:
+
+DO NOT:
+
+- break architecture
+- rename files without permission
+- move files without permission
+- delete files without permission
+- introduce unrelated refactors
+
+ALWAYS:
+
+- follow existing patterns
+- extend safely
+- preserve structure
+- ask before major changes
+
+
+--------------------------------------------------
+STEP 7 — CONFIRM CONTEXT RESTORED
+--------------------------------------------------
+
+Output a concise summary:
+
+- project purpose
+- architecture summary
+- completed parts
+- pending tasks
+- risks or warnings
+
+Then say:
+
+"Project context fully restored. Ready for instructions."
+
+
+--------------------------------------------------
+STEP 8 — WAIT FOR NEXT INSTRUCTION
+--------------------------------------------------
+
+Do NOT modify anything yet.
+
+Wait for explicit user instruction.`;
+        }
+
+        // 显示项目启动脚本模态框
+        function showProjectStartModal() {
+            const projects = getProjects();
+            const currentProjectId = currentProjectFilter;
+
+            // 获取当前项目或第一个项目
+            let selectedProject = currentProjectId
+                ? projects.find(p => p.id === currentProjectId)
+                : projects[0];
+
+            if (!selectedProject) {
+                alert('❌ 没有可用项目');
+                return;
+            }
+
+            const data = projectData[selectedProject.id];
+            const projectName = selectedProject.name.replace(/^[^\s]+\s*/, '');
+            const projectPath = data?.projectPath || '';
+
+            // 生成启动脚本
+            const startScript = `You are resuming ${projectName} as its long-term engineering assistant.
+
+This is a persistent project. Your job is to fully restore context and continue development safely and consistently.
+
+Follow these steps EXACTLY and in order:
+
+--------------------------------------------------
+STEP 1 — LOAD PROJECT RULES
+--------------------------------------------------
+Read and internalize:
+- CLAUDE.md
+- README.md
+
+You MUST follow them strictly.
+
+--------------------------------------------------
+STEP 2 — LOAD LONG-TERM MEMORY
+--------------------------------------------------
+Read ALL files in memory/
+Especially:
+- memory/project-memory.md
+- memory/progress.md
+- memory/decisions.md
+- memory/bugs.md (if exists)
+
+--------------------------------------------------
+STEP 3 — LOAD ARCHITECTURE AND PRODUCT CONTEXT
+--------------------------------------------------
+Read ALL files in docs/
+Especially:
+- docs/architecture.md
+- docs/product.md
+- docs/api.md (if exists)
+
+--------------------------------------------------
+STEP 4 — ANALYZE CURRENT CODEBASE
+--------------------------------------------------
+Scan and understand:
+- src/
+- modules
+- configs
+- system design
+- structure and patterns
+
+--------------------------------------------------
+STEP 5 — RESTORE FULL CONTEXT STATE
+--------------------------------------------------
+Build an internal mental model including:
+- project purpose
+- architecture
+- module responsibilities
+- completed features
+- pending features
+- known issues
+- constraints
+
+--------------------------------------------------
+STEP 6 — ENTER STRICT DEVELOPMENT MODE
+--------------------------------------------------
+DO NOT:
+- break architecture
+- rename files without permission
+- move files without permission
+- delete files without permission
+- introduce unrelated refactors
+
+ALWAYS:
+- follow existing patterns
+- extend safely
+- preserve structure
+- ask before major changes
+
+--------------------------------------------------
+STEP 7 — CONFIRM CONTEXT RESTORED
+--------------------------------------------------
+Output a concise summary:
+- project purpose
+- architecture summary
+- completed parts
+- pending tasks
+- risks or warnings
+
+Then say: "Project context fully restored. Ready for instructions."
+
+--------------------------------------------------
+STEP 8 — WAIT FOR NEXT INSTRUCTION
+--------------------------------------------------
+Do NOT modify anything yet.
+Wait for explicit user instruction.`;
+
+            // 创建项目选择器
+            let projectOptions = projects.map(p => {
+                const selected = p.id === selectedProject.id ? 'selected' : '';
+                return `<option value="${p.id}" ${selected}>${p.name}</option>`;
+            }).join('');
+
+            const modalHtml = `
+                <div id="projectStartModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+                    <div style="background: white; border-radius: 16px; padding: 30px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <div>
+                                <h2 style="margin: 0; font-size: 24px; font-weight: 700;">📋 项目启动脚本</h2>
+                                <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">复制到 Claude Code 快速恢复项目上下文</p>
+                            </div>
+                            <button onclick="document.getElementById('projectStartModal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">×</button>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">选择项目</label>
+                            <select id="projectStartSelect" onchange="updateProjectStartPreview()" style="width: 100%; padding: 10px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; background: white;">
+                                ${projectOptions}
+                            </select>
+                        </div>
+
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">📋 执行步骤预览</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #52c41a;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 1</div>
+                                    <div style="font-size: 13px; font-weight: 600;">加载项目规则</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #1890ff;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 2</div>
+                                    <div style="font-size: 13px; font-weight: 600;">加载长期记忆</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #722ed1;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 3</div>
+                                    <div style="font-size: 13px; font-weight: 600;">加载架构文档</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #fa8c16;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 4</div>
+                                    <div style="font-size: 13px; font-weight: 600;">分析代码库</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #eb2f96;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 5</div>
+                                    <div style="font-size: 13px; font-weight: 600;">恢复上下文</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #13c2c2;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 6</div>
+                                    <div style="font-size: 13px; font-weight: 600;">开发模式</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #52c41a;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 7</div>
+                                    <div style="font-size: 13px; font-weight: 600;">确认恢复</div>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #999;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">STEP 8</div>
+                                    <div style="font-size: 13px; font-weight: 600;">等待指令</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">启动脚本内容</label>
+                            <div id="startScriptPreview" style="background: #1a1a1a; color: #52c41a; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; line-height: 1.6; max-height: 200px; overflow-y: auto; white-space: pre-wrap;">${startScript}</div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button onclick="copyProjectStartScript()" style="flex: 1; padding: 14px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;">📋 复制启动脚本</button>
+                            <button onclick="document.getElementById('projectStartModal').remove()" style="padding: 14px 24px; background: white; color: #3a3a3a; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // 更新启动脚本预览
+        function updateProjectStartPreview() {
+            const select = document.getElementById('projectStartSelect');
+            if (!select) return;
+
+            const projectId = select.value;
+            const project = getProjects().find(p => p.id === projectId);
+            if (!project) return;
+
+            const data = projectData[projectId];
+            const projectName = project.name.replace(/^[^\s]+\s*/, '');
+
+            // 获取项目路径配置
+            const paths = data?.paths || {
+                claude: 'CLAUDE.md',
+                readme: 'README.md',
+                memory: 'memory/',
+                docs: 'docs/',
+                src: 'src/'
+            };
+
+            const startScript = `You are resuming ${projectName} as its long-term engineering assistant.
+
+This is a persistent project. Your job is to fully restore context and continue development safely and consistently.
+
+Follow these steps EXACTLY and in order:
+
+--------------------------------------------------
+STEP 1 — LOAD PROJECT RULES
+--------------------------------------------------
+
+Read and internalize:
+
+- ${paths.claude}
+- ${paths.readme}
+
+These define your behavioral and structural constraints.
+
+You MUST follow them strictly.
+
+
+--------------------------------------------------
+STEP 2 — LOAD LONG-TERM MEMORY
+--------------------------------------------------
+
+Read ALL files in:
+
+${paths.memory}
+
+Especially:
+
+- ${paths.memory}project-memory.md
+- ${paths.memory}progress.md
+- ${paths.memory}decisions.md
+- ${paths.memory}bugs.md (if exists)
+
+These contain long-term project knowledge.
+
+
+--------------------------------------------------
+STEP 3 — LOAD ARCHITECTURE AND PRODUCT CONTEXT
+--------------------------------------------------
+
+Read ALL files in:
+
+${paths.docs}
+
+Especially:
+
+- ${paths.docs}architecture.md
+- ${paths.docs}product.md
+- ${paths.docs}api.md (if exists)
+
+
+--------------------------------------------------
+STEP 4 — ANALYZE CURRENT CODEBASE
+--------------------------------------------------
+
+Scan and understand:
+
+- ${paths.src}
+- modules
+- configs
+- system design
+- structure and patterns
+
+
+Understand:
+
+- what is implemented
+- what is incomplete
+- how components interact
+
+
+--------------------------------------------------
+STEP 5 — RESTORE FULL CONTEXT STATE
+--------------------------------------------------
+
+Build an internal mental model including:
+
+- project purpose
+- architecture
+- module responsibilities
+- completed features
+- pending features
+- known issues
+- constraints
+
+
+--------------------------------------------------
+STEP 6 — ENTER STRICT DEVELOPMENT MODE
+--------------------------------------------------
+
+You MUST follow these rules:
+
+DO NOT:
+
+- break architecture
+- rename files without permission
+- move files without permission
+- delete files without permission
+- introduce unrelated refactors
+
+ALWAYS:
+
+- follow existing patterns
+- extend safely
+- preserve structure
+- ask before major changes
+
+
+--------------------------------------------------
+STEP 7 — CONFIRM CONTEXT RESTORED
+--------------------------------------------------
+
+Output a concise summary:
+
+- project purpose
+- architecture summary
+- completed parts
+- pending tasks
+- risks or warnings
+
+Then say:
+
+"Project context fully restored. Ready for instructions."
+
+
+--------------------------------------------------
+STEP 8 — WAIT FOR NEXT INSTRUCTION
+--------------------------------------------------
+
+Do NOT modify anything yet.
+
+Wait for explicit user instruction.`;
+
+            const preview = document.getElementById('startScriptPreview');
+            if (preview) {
+                preview.textContent = startScript;
+            }
+        }
+
+        // 复制启动脚本
+        function copyProjectStartScript() {
+            const select = document.getElementById('projectStartSelect');
+            const projectId = select.value;
+            const project = getProjects().find(p => p.id === projectId);
+            const data = projectData[projectId];
+            const projectName = project.name.replace(/^[^\s]+\s*/, '');
+
+            const startScript = generateProjectStartTemplate(project);
+
+            if (!startScript) {
+                alert('❌ 该项目未配置启动模板');
+                return;
+            }
+
+            navigator.clipboard.writeText(startScript).then(() => {
+                // 显示成功提示
+                showNotification(`✅ 已复制 ${project.name} 启动脚本`);
+                document.getElementById('projectStartModal').remove();
+            }).catch(() => {
+                // 降级方案
+                const textarea = document.createElement('textarea');
+                textarea.value = startScript;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification(`✅ 已复制 ${project.name} 启动脚本`);
+                document.getElementById('projectStartModal').remove();
+            });
         }
 
         // 刷新所有数据

@@ -3,10 +3,9 @@
 ## 📁 目录说明
 
 ```
-project-summary/
+project summary/
 ├── project-log.html           # 项目日志系统
 ├── 项目经验总结.html             # 项目经验总结文档
-├── PROJECT-SUMMARY.md          # 清迈活动平台项目总结
 ├── project-log-data.json       # 数据文件（首次保存时创建）
 └── README.md                  # 本说明文件
 ```
@@ -91,12 +90,3 @@ project-summary/
 - **自动保存** - 每次保存日志时自动写入文件
 - **无需服务器** - 纯静态页面，直接在浏览器中打开
 - **数据安全** - 所有数据保存在本地，不上传到云端
-
----
-
-## 📂 项目总结文档
-
-本仓库还包含各项目的详细总结文档：
-
-- **[PROJECT-SUMMARY.md](PROJECT-SUMMARY.md)** - 清迈活动平台项目总结
-- 更多项目总结将陆续添加...

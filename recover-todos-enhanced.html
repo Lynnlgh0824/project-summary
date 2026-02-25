@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 待办清单恢复工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 25px; }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: #667eea;
+            color: white;
+            margin-right: 10px;
+        }
+        button:hover { background: #5568d3; }
+        .result {
+            background: #f0f5ff;
+            border: 2px solid #adc6ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { background: #f6ffed; border-color: #b7eb8f; }
+        .error { background: #fff2f0; border-color: #ffccc7; }
+        .todo-item {
+            background: white;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="checkbox"] { width: 18px; height: 18px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 待办清单恢复工具</h1>
+        <p class="subtitle">从浏览器存储或工作日志中恢复待办事项</p>
+
+        <!-- 步骤1：检查浏览器 -->
+        <div class="section">
+            <h3>步骤1：检查浏览器数据</h3>
+            <p style="color: #666; margin-bottom: 15px;">检查 localStorage 和 sessionStorage 中是否有待办数据</p>
+            <button onclick="checkBrowserStorage()">🔍 检查浏览器存储</button>
+            <div id="browserResult"></div>
+        </div>
+
+        <!-- 步骤2：从日志提取 -->
+        <div class="section">
+            <h3>步骤2：从日志智能提取</h3>
+            <p style="color: #666; margin-bottom: 15px;">从当前项目日志中自动提取待办事项</p>
+            <button onclick="extractFromCurrentLogs()">📋 从当前日志提取</button>
+            <div id="logResult"></div>
+        </div>
+
+        <!-- 步骤3：手动输入 -->
+        <div class="section">
+            <h3>步骤3：手动输入恢复</h3>
+            <p style="color: #666; margin-bottom: 15px;">直接输入丢失的待办事项（每行一个）</p>
+            <textarea id="manualInput" style="width: 100%; min-height: 100px; padding: 10px; border: 2px solid #e8e8e8; border-radius: 8px;" placeholder="待办事项1&#10;待办事项2&#10;待办事项3"></textarea>
+            <div style="margin-top: 10px;">
+                <button onclick="applyManualInput()">✅ 恢复手动输入的待办</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TODOS_KEY = 'project_todos';
+        const PROJECTS_KEY = 'project_list';
+        const LOGS_KEY = 'project_logs';
+
+        // 检查浏览器存储
+        function checkBrowserStorage() {
+            const resultDiv = document.getElementById('browserResult');
+            let output = '<div class="result">';
+            let found = false;
+
+            // 检查所有可能的键
+            const possibleKeys = [
+                'project_todos', 'todos', 'todo_list', 'my_todos',
+                'tasks', 'project_tasks', 'todoData'
+            ];
+
+            for (const key of possibleKeys) {
+                // 检查 localStorage
+                let data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        const count = typeof parsed === 'object' ?
+                            Object.values(parsed).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0) :
+                            Array.isArray(parsed) ? parsed.length : 1;
+
+                        output += `✅ 找到 localStorage[${key}]: ${count} 项待办\n\n`;
+                        output += JSON.stringify(parsed, null, 2);
+
+                        // 自动恢复
+                        localStorage.setItem(TODOS_KEY, data);
+                        found = true;
+                    } catch(e) {}
+                }
+
+                // 检查 sessionStorage
+                data = sessionStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        const count = typeof parsed === 'object' ?
+                            Object.values(parsed).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0) :
+                            Array.isArray(parsed) ? parsed.length : 1;
+
+                        output += `\n\n✅ 找到 sessionStorage[${key}]: ${count} 项待办\n\n`;
+                        output += JSON.stringify(parsed, null, 2);
+
+                        localStorage.setItem(TODOS_KEY, data);
+                        found = true;
+                    } catch(e) {}
+                }
+            }
+
+            if (!found) {
+                output += '❌ 未在浏览器中找到待办清单数据\n\n';
+                output += '建议：使用"从当前日志提取"功能';
+            } else {
+                output += '\n\n✅ 数据已恢复！请刷新主页面查看。';
+            }
+
+            output += '</div>';
+            resultDiv.innerHTML = output;
+        }
+
+        // 从当前日志提取
+        function extractFromCurrentLogs() {
+            const resultDiv = document.getElementById('logResult');
+
+            // 读取日志
+            const logs = JSON.parse(localStorage.getItem(LOGS_KEY) || '[]');
+            if (logs.length === 0) {
+                resultDiv.innerHTML = '<div class="result error">❌ 没有找到工作日志</div>';
+                return;
+            }
+
+            // 待办关键词
+            const todoKeywords = [
+                '待办', '待做', '未完成', 'TODO', 'todo', '待完成',
+                '需要', '继续', '还要', '记得', '别忘了',
+                'fix', '修复', '添加', '优化', '实现', '完成'
+            ];
+
+            // 提取待办
+            const extractedTodos = [];
+
+            logs.forEach(log => {
+                const lines = log.content.split('\n');
+                lines.forEach(line => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine || trimmedLine.startsWith('//') || trimmedLine.startsWith('#')) {
+                        return;
+                    }
+
+                    // 检查是否包含待办关键词
+                    const hasKeyword = todoKeywords.some(keyword =>
+                        trimmedLine.toLowerCase().includes(keyword.toLowerCase())
+                    );
+
+                    if (hasKeyword) {
+                        let text = trimmedLine;
+                        // 移除标记符号
+                        text = text.replace(/^[-*•+]\s*/, '');
+                        text = text.replace(/^(\d+)[.、]\s*/, '');
+                        text = text.replace(/^(待办|TODO|todo|待做|fix):\s*/i, '');
+                        text = text.replace(/^\[[ x]\]\s*/, '');
+                        text = text.trim();
+
+                        if (text.length > 2) {  // 至少3个字符
+                            extractedTodos.push({
+                                projectId: log.projectId,
+                                project: getProjectName(log.projectId),
+                                text: text,
+                                date: log.date
+                            });
+                        }
+                    }
+                });
+            });
+
+            if (extractedTodos.length === 0) {
+                resultDiv.innerHTML = '<div class="result error">❌ 未在日志中找到待办事项<br><br>提示：确保日志包含"待办"、"未完成"、"需要"等关键词</div>';
+                return;
+            }
+
+            // 显示提取结果
+            let html = '<div class="result success">';
+            html += `✅ 从 ${logs.length} 条日志中提取到 ${extractedTodos.length} 个待办事项：<br><br>`;
+
+            extractedTodos.forEach((todo, index) => {
+                html += `
+                    <div class="todo-item">
+                        <input type="checkbox" id="todo_${index}" checked>
+                        <label for="todo_${index}" style="flex: 1;">
+                            <strong>[${todo.project}]</strong> ${escapeHtml(todo.text)}
+                            <span style="color: #999; font-size: 12px; margin-left: 10px;">${todo.date}</span>
+                        </label>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            html += '<button onclick="applyExtractedTodos()" style="margin-top: 10px;">✅ 应用提取的待办</button>';
+
+            resultDiv.innerHTML = html;
+
+            // 保存到全局变量供后续使用
+            window.extractedTodos = extractedTodos;
+        }
+
+        // 应用提取的待办
+        function applyExtractedTodos() {
+            if (!window.extractedTodos || window.extractedTodos.length === 0) {
+                alert('请先提取待办事项');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('#logResult input[type="checkbox"]');
+            const selectedTodos = [];
+
+            window.extractedTodos.forEach((todo, index) => {
+                if (checkboxes[index] && checkboxes[index].checked) {
+                    selectedTodos.push(todo);
+                }
+            });
+
+            if (selectedTodos.length === 0) {
+                alert('请至少选择一个待办事项');
+                return;
+            }
+
+            // 读取现有待办
+            const todos = JSON.parse(localStorage.getItem(TODOS_KEY) || '{}');
+
+            // 添加新待办
+            const now = Date.now();
+            selectedTodos.forEach(todo => {
+                if (!todos[todo.projectId]) {
+                    todos[todo.projectId] = [];
+                }
+
+                todos[todo.projectId].push({
+                    id: `todo_${now}_${Math.random().toString(36).substr(2, 9)}`,
+                    text: todo.text,
+                    priority: 'medium',
+                    status: 'pending',
+                    dueDate: null,
+                    createdAt: new Date().toISOString(),
+                    source: 'log-extract'
+                });
+            });
+
+            // 保存
+            localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+
+            alert(`✅ 成功恢复 ${selectedTodos.length} 个待办事项！\n\n请刷新主页面查看。`);
+        }
+
+        // 应用手动输入
+        function applyManualInput() {
+            const text = document.getElementById('manualInput').value.trim();
+            if (!text) {
+                alert('请输入待办事项');
+                return;
+            }
+
+            const lines = text.split('\n').filter(line => line.trim());
+            if (lines.length === 0) {
+                alert('请输入至少一个待办事项');
+                return;
+            }
+
+            // 获取第一个项目
+            const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]');
+            if (projects.length === 0) {
+                alert('错误：找不到项目列表');
+                return;
+            }
+
+            const projectId = projects[0].id;
+            const todos = JSON.parse(localStorage.getItem(TODOS_KEY) || '{}');
+
+            if (!todos[projectId]) {
+                todos[projectId] = [];
+            }
+
+            const now = Date.now();
+            lines.forEach(line => {
+                todos[projectId].push({
+                    id: `todo_${now}_${Math.random().toString(36).substr(2, 9)}`,
+                    text: line.trim(),
+                    priority: 'medium',
+                    status: 'pending',
+                    dueDate: null,
+                    createdAt: new Date().toISOString()
+                });
+            });
+
+            localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+
+            alert(`✅ 成功恢复 ${lines.length} 个待办事项！\n\n请刷新主页面查看。`);
+            document.getElementById('manualInput').value = '';
+        }
+
+        // 获取项目名称
+        function getProjectName(projectId) {
+            const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]');
+            const project = projects.find(p => p.id === projectId);
+            return project ? project.name : projectId;
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
