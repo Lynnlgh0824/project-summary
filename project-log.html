@@ -1,0 +1,3157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 项目日志系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 背景装饰圆 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -10%;
+            right: -10%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.3);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(92, 124, 250, 0.95) 0%, rgba(116, 143, 252, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #5c7cfa;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-quick-add {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #5c7cfa 0%, #748ffc 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(92, 124, 250, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-quick-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(92, 124, 250, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-quick-add:active {
+            transform: translateY(0);
+        }
+
+        .content {
+            display: flex;
+            height: calc(100vh - 140px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+            padding-top: 0;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px 20px 10px 20px;
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        .sidebar-content {
+            overflow-y: auto;
+            flex: 1;
+            padding: 0 20px 20px 20px;
+        }
+
+        .main {
+            flex: 1;
+            padding: 0 30px 30px 30px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* 标签页导航粘性定位 */
+        .tab-navigation {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            padding: 10px 30px;
+            margin: 0 -30px 20px -30px;
+            border-bottom: 2px solid #dee2e6;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tab-navigation.fixed {
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .project-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .project-item:hover {
+            background: #e3f2fd;
+        }
+
+        .project-item.active {
+            background: #5c7cfa;
+            color: white;
+        }
+
+        .project-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .project-date {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .project-name {
+            font-weight: 600;
+            color: #5c7cfa;
+        }
+
+        .log-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 0 5px 5px 0;
+        }
+
+        .tag-feature { background: #e3f2fd; color: #1565c0; }
+        .tag-fix { background: #ffebee; color: #c62828; }
+        .tag-improvement { background: #e8f5e9; color: #2e7d32; }
+        .tag-learning { background: #fff3e0; color: #e65100; }
+
+        .add-log-form {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .add-log-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #5c7cfa;
+            box-shadow: 0 0 0 3px rgba(92, 124, 250, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #5c7cfa;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .log-summary {
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .log-summary.expanded {
+            white-space: normal;
+            max-width: none;
+        }
+
+        /* 标签页样式 */
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #f8f9fa;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #e9ecef;
+        }
+
+        .tab-btn.active {
+            background: #5c7cfa;
+            color: white;
+        }
+
+        .tab-content {
+            display: block;
+            margin-top: 20px;
+        }
+
+        /* 链接卡片样式 */
+        .link-card {
+            display: block;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .link-card:hover {
+            border-color: rgba(92, 124, 250, 0.4);
+            box-shadow: 0 4px 12px rgba(92,124,250,0.2);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .link-card-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .link-card-path {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .empty-state-enhanced {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(245, 247, 250, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 2px dashed rgba(222, 226, 230, 0.5);
+        }
+
+        .empty-state-enhanced .emoji {
+            font-size: 56px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-state-enhanced .message {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-enhanced .hint {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .project-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 25px 0 15px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(92, 124, 250, 0.95) 0%, rgba(116, 143, 252, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .project-section-header:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 24px rgba(92,124,250,0.35);
+        }
+
+        .project-section-header .index {
+            font-size: 18px;
+            font-weight: 700;
+            margin-right: 12px;
+            opacity: 0.9;
+        }
+
+        .project-section-header .name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .project-section-header .hint {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .links-container {
+            display: grid;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(240, 244, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(222, 226, 230, 0.5);
+        }
+
+        .no-content-message {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 14px;
+            background: white;
+            border-radius: 8px;
+            border: 1px dashed #dee2e6;
+        }
+
+        /* 分类标题样式 */
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin: 20px 0 12px;
+            padding: 12px 16px;
+            background: rgba(248, 249, 250, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border-left: 5px solid #5c7cfa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .category-header:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(3px);
+        }
+
+        .category-header .icon {
+            font-size: 24px;
+            margin-right: 12px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .category-header .title {
+            font-weight: 700;
+            color: #222;
+            font-size: 16px;
+            flex: 1;
+            letter-spacing: 0.3px;
+        }
+
+        .category-header .desc {
+            font-size: 13px;
+            color: #888;
+            margin-right: 10px;
+            font-weight: 400;
+        }
+
+        .category-header .count {
+            font-size: 13px;
+            font-weight: 600;
+            color: #5c7cfa;
+            background: rgba(227, 244, 255, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(184, 228, 255, 0.5);
+        }
+
+        .link-card-docs { border-left: 3px solid #5c7cfa; }
+        .link-card-tools { border-left: 3px solid #ff9800; }
+        .link-card-learning { border-left: 3px solid #4caf50; }
+        .link-card-paths { border-left: 3px solid #9c27b0; }
+
+        /* 待办清单样式 */
+        .todo-project-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .todo-project-card:hover {
+            box-shadow: 0 12px 48px rgba(92, 124, 250, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .todo-project-header {
+            background: linear-gradient(135deg, rgba(92, 124, 250, 0.95) 0%, rgba(116, 143, 252, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .todo-project-header:hover {
+            filter: brightness(1.05);
+        }
+
+        .todo-project-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .todo-project-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .todo-project-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .todo-list {
+            padding: 15px 20px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: rgba(248, 249, 250, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .todo-item:hover {
+            background: rgba(233, 236, 239, 0.8);
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(92, 124, 250, 0.1);
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .todo-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .todo-priority {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .todo-priority.high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .todo-priority.medium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .todo-priority.low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .todo-due-date {
+            font-size: 12px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .todo-due-date.overdue {
+            color: #c62828;
+            font-weight: 600;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .todo-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+
+        .todo-item:hover .todo-btn {
+            opacity: 1;
+        }
+
+        .todo-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .todo-btn-delete:hover {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .add-todo-form {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #f0f4ff;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .add-todo-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .add-todo-form select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .add-todo-form button {
+            padding: 8px 16px;
+            background: #5c7cfa;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-todo-form button:hover {
+            background: #4263eb;
+        }
+
+        .empty-todos {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            background: rgba(248, 249, 250, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            border: 2px dashed rgba(222, 226, 230, 0.5);
+        }
+
+        .empty-todos .emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📅 项目日志系统</h1>
+                <p style="font-size: 14px; opacity: 0.9; margin-top: 5px;">
+                    按项目、日期记录工作总结，自动生成日报
+                </p>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn-success" onclick="refreshAllData()">🔄 刷新数据</button>
+                <button class="btn btn-primary" onclick="autoGenerateTodayLog()">🤖 智能生成</button>
+                <button class="btn btn-primary" onclick="showAddForm()">➕ 添加日志</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 侧边栏：项目列表 -->
+            <div class="sidebar">
+                <!-- 侧边栏头部 - 固定 -->
+                <div class="sidebar-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; color: #333;">📁 项目列表</h3>
+                        <button class="btn btn-primary" onclick="showAddProjectForm()" style="padding: 5px 10px; font-size: 12px;">➕</button>
+                    </div>
+                </div>
+
+                <!-- 侧边栏内容 - 可滚动 -->
+                <div class="sidebar-content">
+                    <!-- 添加项目表单 -->
+                    <div id="addProjectForm" style="display: none; background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <input type="text" id="newProjectName" class="form-control" placeholder="项目名称" style="margin-bottom: 10px;">
+                        <button class="btn btn-success" onclick="addNewProject()" style="width: 100%; font-size: 12px;">保存</button>
+                        <button class="btn btn-primary" onclick="hideAddProjectForm()" style="width: 100%; margin-top: 5px; font-size: 12px;">取消</button>
+                    </div>
+
+                    <div id="projectList"></div>
+
+                    <!-- 项目统计 -->
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                        <h4 style="margin-bottom: 15px; font-size: 14px; color: #666;">📊 项目统计</h4>
+                        <div id="projectStats"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="main">
+                <!-- 标签页导航 - 粘性定位 -->
+                <div class="tab-navigation">
+                    <div style="display: flex; gap: 10px; margin-bottom: 0;">
+                        <button class="tab-btn active" onclick="switchTab('todos')">✅ 待办清单</button>
+                        <button class="tab-btn" onclick="switchTab('logs')">📅 工作日志</button>
+                        <button class="tab-btn" onclick="switchTab('summary')">📚 项目经验总结</button>
+                        <button class="tab-btn" onclick="switchTab('links')">🔗 项目链接汇总</button>
+                        <button class="tab-btn" onclick="switchTab('check')">🔍 项目检查</button>
+                    </div>
+                </div>
+
+                <!-- 标签页1: 待办清单 -->
+                <div id="tab-todos" class="tab-content">
+                <div id="todosContent"></div>
+            </div>
+
+            <!-- 标签页2: 工作日志 -->
+            <div id="tab-logs" class="tab-content" style="display: none;">
+                <!-- 统计卡片 -->
+                <div class="stats" id="stats"></div>
+
+                <!-- 添加表单 -->
+                <div class="add-log-form" id="addForm">
+                <h2 style="margin-bottom: 20px;">➕ 添加项目日志</h2>
+                <div class="form-group">
+                    <label>项目名称 *</label>
+                    <select id="projectSelect" class="form-control">
+                        <option value="english-learning-tts">英语学习 TTS 系统</option>
+                        <option value="data-analysis">数据分析项目</option>
+                        <option value="other">其他项目</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="otherProjectGroup" style="display: none;">
+                    <label>其他项目名称 *</label>
+                    <input type="text" id="otherProjectName" class="form-control" placeholder="输入项目名称">
+                </div>
+
+                <div class="form-group">
+                    <label>日期 *</label>
+                    <input type="date" id="logDate" class="form-control" value="">
+                </div>
+
+                <div class="form-group">
+                    <label>类型</label>
+                    <select id="logType" class="form-control">
+                        <option value="feature">✨ 新功能</option>
+                        <option value="fix">🔧 修复 Bug</option>
+                        <option value="improvement">🚀 优化改进</option>
+                        <option value="learning">📚 学习总结</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>项目总结日志（每行一项） *</label>
+                    <textarea id="logItems" class="form-control" placeholder="✅ 修复 TTS 队列策略问题&#10;✅ 创建项目日志系统&#10;✅ 添加桌面快捷方式"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>代码片段（可选）</label>
+                    <textarea id="logCode" class="form-control" placeholder="粘贴相关代码..."></textarea>
+                </div>
+
+                <button class="btn btn-success" onclick="saveLogForm()">💾 保存日志</button>
+                <button class="btn btn-primary" onclick="hideAddForm()">❌ 取消</button>
+            </div>
+
+            <!-- 日志列表 -->
+            <div id="logTable"></div>
+            </div>
+
+            <!-- 标签页3: 项目经验总结 -->
+            <div id="tab-summary" class="tab-content" style="display: none;">
+                <div id="summaryContent"></div>
+            </div>
+
+            <!-- 标签页4: 项目链接汇总 -->
+            <div id="tab-links" class="tab-content" style="display: none;">
+                <div id="linksContent"></div>
+            </div>
+
+            <!-- 标签页5: 项目检查 -->
+            <div id="tab-check" class="tab-content" style="display: none;">
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>🔍 项目文件检查</h2>
+                        <button class="btn btn-primary" onclick="runProjectCheck()">▶️ 运行检查</button>
+                    </div>
+                    <div id="checkResults" style="margin-top: 20px;">
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <p>点击"运行检查"按钮开始检查项目文件</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'project_logs';
+        const PROJECTS_KEY = 'project_list';
+        const TODOS_KEY = 'project_todos';
+        let fileHandle = null; // 文件句柄，用于自动保存
+
+        const defaultProjects = [
+            { id: 'project-organization', name: '🗂️ 项目组织与管理', startDate: '2026-02-06' },
+            { id: 'english-learning-tts', name: '🎧 英语学习', startDate: '2026-02-05' },
+            { id: 'chiang-mai-activities', name: '🏝️ 清迈活动探索', startDate: '2026-01-19' },
+            { id: 'aisaas-video', name: '🎥 AI SaaS 视频项目', startDate: '2026-01-22' },
+            { id: 'clawdbot-railway', name: '🤖 Clawdbot', startDate: '2026-01-15' },
+            { id: 'skills-development', name: '⚡ 技能开发与学习', startDate: '2026-01-01' }
+        ];
+
+                // 项目数据
+        const projectData = {
+            'project-organization': {
+                summary: {
+                    title: '🗂️ 项目组织与管理',
+                    description: '项目结构优化、文件管理、桌面快捷方式配置',
+                    achievements: [
+                        '✅ 清理项目目录 - 归档旧文件',
+                        '✅ 重组项目结构 - 创建 project summary 目录',
+                        '✅ 修复桌面快捷方式',
+                        '✅ 优化项目日志系统'
+                    ],
+                    docs: []
+                },
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/project summary/'
+            },
+            'english-learning-tts': {
+                summary: {
+                    title: '🎧 英语学习 TTS 系统',
+                    description: 'Web Speech API实现的智能朗读系统，支持语速调节、句子停顿。包含YouTube视频学习内容。',
+                    achievements: [
+                        '✅ 实现句子间1秒停顿 - 递归播放 + setTimeout',
+                        '✅ 语速设置 - 快速1.0x、标准0.5x、缓慢0.25x',
+                        '✅ 代码优化 - 删除903行重复代码',
+                        '✅ UI优化 - 粘性导航、响应式布局',
+                        '✅ YouTube视频学习 - 创业、上海重新开始、回家之路、清迈独居'
+                    ],
+                    docs: [
+                        // 📚 文档资料
+                        { name: '📖 项目说明', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/README.md', category: 'docs' },
+                        { name: '📋 测试工具指南', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/TEST-TOOLS.md', category: 'docs' },
+                        { name: '🔧 TTS测试说明', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/TTS-TEST.md', category: 'docs' },
+                        { name: '🧹 测试工具清理方案', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/TEST-TOOLS-CLEANUP.md', category: 'docs' },
+                        { name: '🔗 完整链接汇总', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/ALL-LINKS.md', category: 'docs' },
+                        { name: '🚨 TTS Canceled错误修复', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/TTS-CANCELED-FIX-2026-02-24.md', category: 'docs' },
+                        { name: '🧟 TTS僵尸状态解决方案', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/TTS-ZOMBIE-STATE-SOLUTION.md', category: 'docs' },
+                        // 🛠️ 测试与维护
+                        { name: '🧪 测试与维护中心', url: 'http://localhost:8001/test-hub.html', category: 'test' },
+                        { name: '🚀 简单自动测试', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/simple-auto-test.html', category: 'test' },
+                        { name: '🔧 TTS引擎恢复工具', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/tts-engine-recovery.html', category: 'test' },
+                        { name: '🧪 自动化测试套件', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/auto-test-runner.html', category: 'test' },
+                        { name: '🎯 最终功能验证', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/test-final-validation.html', category: 'test' },
+                        { name: '🐛 TTS调试工具', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/test-debug.html', category: 'test' },
+                        { name: '🔊 音频输出测试', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/test-audio-output.html', category: 'test' },
+                        { name: '👆 用户手势测试', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/test-user-gesture.html', category: 'test' },
+                        { name: '📝 自动日志捕获', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/auto-log-capture.html', category: 'test' },
+                        { name: '🔍 TTS诊断工具', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/archives/test-files/auto-diagnose.html', category: 'test' },
+                        // 🔧 核心脚本
+                        { name: '🔊 TTS核心功能', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/scripts/tts-common.js', category: 'script' },
+                        { name: '📄 页面公共功能', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/scripts/page-common.js', category: 'script' }
+                    ]
+                },
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/'
+            },
+            'aisaas-video': {
+                summary: {
+                    title: '🎥 AI SaaS 视频项目',
+                    description: 'AI视频生成工具和套壳站研究',
+                    achievements: [
+                        '✅ 收集AI视频套壳站相关资料',
+                        '✅ 研究视频SaaS站第二次直播内容',
+                        '✅ 分析AI视频生成工具市场'
+                    ],
+                    docs: [
+                        { name: '🎬 AI视频工具研究', url: 'https://www.synthesia.io/', category: 'learning' },
+                        { name: '🤖 HeyGen 视频生成', url: 'https://www.heygen.com/', category: 'learning' },
+                        { name: '📺 SaaS产品案例', url: 'https://www.producthunt.com/', category: 'learning' }
+                    ]
+                },
+                folder: '/Users/yuzhoudeshengyin/Desktop/AI相关项目/' },
+            'clawdbot-railway': {
+                summary: {
+                    title: '🤖 Clawdbot Railway 模板',
+                    description: 'Discord Bot 部署模板和 Railway 平台配置',
+                    achievements: [
+                        '✅ 研究 Railway 平台部署',
+                        '✅ 配置 Clawdbot 模板',
+                        '✅ 测试 Discord Bot 功能'
+                    ],
+                    docs: []
+                },
+                folder: '/Users/yuzhoudeshengyin/Desktop/',
+                projectFolder: '/Users/yuzhoudeshengyin/Documents/my_project/clawdbot-railway/'
+            },
+            'chiang-mai-activities': {
+                summary: {
+                    title: '🏝️ 清迈活动策划',
+                    description: '活动管理系统 - 数据质量、自动化测试',
+                    achievements: [
+                        '✅ 实现活动数据管理系统',
+                        '✅ GitHub Actions 自动化数据质量检查',
+                        '✅ 自动化测试框架',
+                        '✅ 智能描述修复工具',
+                        '✅ 推送到 GitHub (20个文件, +13,227行)'
+                    ],
+                    docs: [
+                        { name: '🌐 主页面', url: 'http://localhost:8001/public/', category: 'tools' },
+                        { name: '🔧 管理后台', url: 'http://localhost:8001/public/admin.html', category: 'tools' },
+                        { name: '📦 归档查看', url: 'http://localhost:8001/public/archive-view.html', category: 'tools' },
+                        { name: '📊 GitHub 仓库', url: 'https://github.com/Lynnlgh0824/chiengmai-activities', category: 'docs' },
+                        { name: '📖 README 文档', url: 'https://github.com/Lynnlgh0824/chiengmai-activities/blob/main/README.md', category: 'docs' },
+                        { name: '🧪 测试指南', url: 'https://github.com/Lynnlgh0824/chiengmai-activities/blob/main/docs/TESTING-GUIDE.md', category: 'docs' },
+                        { name: '⚙️ 自动化指南', url: 'file:///Users/yuzhoudeshengyin/Documents/my_project/Chiengmai/AUTOMATION-GUIDE.md', category: 'docs' },
+                        { name: '🔄 GitHub Actions', url: 'https://github.com/Lynnlgh0824/chiengmai-activities/actions', category: 'tools' },
+                        { name: '📝 测试总结', url: 'file:///Users/yuzhoudeshengyin/Documents/my_project/Chiengmai/docs/TESTING-SUMMARY.md', category: 'docs' },
+                        { name: '🎬 AI视频工具研究', url: 'https://www.synthesia.io/', category: 'learning' },
+                        { name: '🤖 HeyGen 视频生成', url: 'https://www.heygen.com/', category: 'learning' },
+                        { name: '📺 SaaS产品案例', url: 'https://www.producthunt.com/', category: 'learning' }
+                    ]
+                },
+                folder: '/Users/yuzhoudeshengyin/Desktop/AI相关项目/清迈活动/',
+                projectFolder: '/Users/yuzhoudeshengyin/Documents/my_project/Chiengmai/',
+                serverPort: 8001
+            },
+            'planning-system': {
+                summary: {
+                    title: '📋 Planning 文件管理系统',
+                    description: '开发流程、需求模板、Bug报告等',
+                    achievements: [
+                        '✅ 创建需求模板文档',
+                        '✅ 创建Bug报告模板',
+                        '✅ 创建开发流程规范'
+                    ],
+                    docs: [
+                        { name: '📖 Planning使用指南', url: '/Users/yuzhoudeshengyin/Documents/my_project/Planning-with-Files-使用指南.md', category: 'docs' }
+                    ]
+                },
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/'
+            },
+            'skills-development': {
+                summary: {
+                    title: '⚡ 技能开发与学习',
+                    description: 'Claude Code 技能和工具集',
+                    achievements: [
+                        '✅ 研究Claude Code技能开发',
+                        '✅ 整理开发工具和资源'
+                    ],
+                    docs: [
+                        { name: '📖 需求模板', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/REQUIREMENT-TEMPLATE.md', category: 'docs' },
+                        { name: '🐛 Bug报告模板', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/BUG-REPORT-TEMPLATE.md', category: 'docs' },
+                        { name: '🔄 开发流程', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/DEVELOPMENT-PROCESS.md', category: 'docs' },
+                        { name: '💬 沟通协议', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/COMMUNICATION-PROTOCOL.md', category: 'docs' },
+                        { name: '📈 改进指南', url: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning/docs/IMPROVEMENT-GUIDE.md', category: 'docs' },
+                        { name: '🎯 项目管理最佳实践', url: 'https://www.pmi.org/', category: 'learning' },
+                        { name: '💡 敏捷开发', url: 'https://www.scrum.org/', category: 'learning' },
+                        { name: '📊 代码质量管理', url: 'https://www.sonarsource.com/', category: 'learning' },
+                        { name: '🧪 测试驱动开发', url: 'https://jestjs.io/', category: 'learning' },
+                        { name: '🎨 UI/UX 设计原则', url: 'https://www.nngroup.com/', category: 'learning' },
+                        { name: '📝 技术写作', url: 'https://developers.google.com/tech-writing', category: 'learning' },
+                        { name: '🔍 代码审查', url: 'https://www.phacility.com/arcanist/', category: 'learning' },
+                        { name: '🏠 主页（自动适配）', url: 'http://localhost:3000/index.html', category: 'docs' },
+                        { name: '⚙️ 管理页面', url: 'http://localhost:3000/admin.html', category: 'docs' },
+                        { name: '🧪 综合测试面板', url: 'http://localhost:3000/test-dashboard.html', category: 'tools' },
+                        { name: '📊 访问仪表板', url: 'http://localhost:3000/tests/test-dashboard-enhanced.html', category: 'tools' },
+                        { name: '🔌 应用版本 API', url: 'http://localhost:3000/app/version', category: 'tools' },
+                        { name: '📡 数据版本 API', url: 'http://localhost:3000/api/version', category: 'tools' },
+                        { name: '📊 活动数据 API', url: 'http://localhost:3000/api/activities', category: 'tools' },
+                        { name: '📖 测试思维方法论', url: 'http://localhost:3000/docs/测试思维方法论.md', category: 'docs' },
+                        { name: '📚 测试功能说明', url: 'http://localhost:3000/docs/测试功能说明.md', category: 'docs' },
+                        { name: '🗂️ 项目文件结构', url: 'http://localhost:3000/docs/项目文件结构说明.md', category: 'docs' },
+                        { name: '📋 项目链接清单', url: 'http://localhost:3000/docs/项目链接清单.md', category: 'docs' }
+                    ],
+                },
+                skills: '/Users/yuzhoudeshyin/.claude/skills/',
+                desktop: '/Users/yuzhoudeshengyin/Desktop/',
+                folder: '/Users/yuzhoudeshengyin/Documents/my_project/skills/'
+            }
+        };
+
+        // 链接分类配置
+        const linkCategories = {
+            'docs': { icon: '📚', title: '文档资料', color: '#5c7cfa', desc: '项目文档、使用指南' },
+            'tools': { icon: '🛠️', title: '工具和测试', color: '#ff9800', desc: '测试工具、自动化脚本' },
+            'learning': { icon: '🎬', title: '学习资源', color: '#4caf50', desc: '视频学习记录' },
+            'paths': { icon: '📂', title: '项目路径', color: '#9c27b0', desc: '文件夹和工作区' }
+        };
+
+        let currentProjectFilter = null; // 当前筛选的项目ID
+
+        // 渲染项目列表
+        function renderProjectList() {
+            const projects = getProjects();
+            const container = document.getElementById('projectList');
+            container.innerHTML = '';
+
+            // 添加"全部项目"选项
+            const allDiv = document.createElement('div');
+            allDiv.className = 'project-item' + (currentProjectFilter === null ? ' active' : '');
+            allDiv.onclick = () => filterByProject(null);
+            allDiv.innerHTML = `
+                <div class="project-name">📂 全部项目</div>
+                <div class="project-date">查看所有日志</div>
+            `;
+            container.appendChild(allDiv);
+
+            projects.forEach(project => {
+                const div = document.createElement('div');
+                div.className = 'project-item' + (currentProjectFilter === project.id ? ' active' : '');
+                div.onclick = () => filterByProject(project.id);
+                div.innerHTML = `
+                    <div class="project-name">${project.name}</div>
+                    <div class="project-date">开始: ${project.startDate}</div>
+                `;
+                container.appendChild(div);
+            });
+
+            renderProjectStats();
+        }
+
+        // 渲染项目统计
+        function renderProjectStats() {
+            const projects = getProjects();
+            const logs = getLogs();
+            const container = document.getElementById('projectStats');
+
+            let html = '';
+
+            projects.forEach(project => {
+                const projectLogs = logs.filter(log => log.projectId === project.id);
+                const days = [...new Set(projectLogs.map(log => log.date))].length;
+
+                html += `
+                    <div style="margin-bottom: 15px; font-size: 13px;">
+                        <div style="font-weight: 600; margin-bottom: 5px;">${project.name}</div>
+                        <div style="color: #666;">
+                            📝 ${projectLogs.length} 条日志 | 📅 ${days} 天
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 按项目筛选
+        function filterByProject(projectId) {
+            currentProjectFilter = projectId;
+            renderProjectList();
+            renderAll();
+
+            // 检查当前活跃的标签页并重新渲染内容
+            const activeTabBtn = document.querySelector('.tab-btn.active');
+            if (activeTabBtn) {
+                const tabText = activeTabBtn.textContent;
+                if (tabText.includes('📚 项目经验总结')) {
+                    renderSummaryContent();
+                } else if (tabText.includes('🔗 项目链接汇总')) {
+                    renderLinksContent();
+                } else if (tabText.includes('✅ 待办清单')) {
+                    renderTodosContent();
+                } else {
+                    // 如果不在总结、链接或待办标签页，切换到工作日志
+                    switchTab('logs');
+                }
+            } else {
+                // 如果没有活跃标签页，切换到工作日志
+                switchTab('logs');
+            }
+        }
+
+        // 显示添加项目表单
+        function showAddProjectForm() {
+            document.getElementById('addProjectForm').style.display = 'block';
+        }
+
+        // 隐藏添加项目表单
+        function hideAddProjectForm() {
+            document.getElementById('addProjectForm').style.display = 'none';
+            document.getElementById('newProjectName').value = '';
+        }
+
+        // 添加新项目
+        function addNewProject() {
+            const name = document.getElementById('newProjectName').value.trim();
+            if (!name) {
+                alert('请输入项目名称');
+                return;
+            }
+
+            const projects = getProjects();
+            const newProject = {
+                id: 'project-' + Date.now(),
+                name: name,
+                startDate: new Date().toISOString().split('T')[0]
+            };
+
+            projects.push(newProject);
+            localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+
+            hideAddProjectForm();
+            renderProjectList();
+
+            // 更新日志表单的项目选择器
+            updateProjectSelector();
+
+            alert('✅ 项目已添加');
+        }
+
+        // 更新项目选择器
+        function updateProjectSelector() {
+            const projects = getProjects();
+            const select = document.getElementById('projectSelect');
+            const currentValue = select.value;
+
+            select.innerHTML = projects.map(p =>
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('') + '<option value="other">其他项目</option>';
+
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+
+        // 生成历史项目日志（只记录有实际编码工作的日期）
+        function generateProjectHistory() {
+            const logs = getLogs();
+
+            // 如果已有日志，不再生成
+            if (logs.length > 0) {
+                return;
+            }
+
+            const historyLogs = [];
+
+            // 2月6日：项目组织与管理
+            historyLogs.push({
+                id: Date.now().toString(),
+                projectId: 'project-organization',
+                projectName: '项目组织与管理',
+                date: '2026-02-06',
+                datetime: new Date().toLocaleString('zh-CN'),
+                title: '🗂️ 项目组织优化 + 桌面链接修复',
+                tags: [{ name: '🚀 优化', type: 'improvement' }, { name: '🔧 修复', type: 'fix' }],
+                items: [
+                    '✅ 清理项目目录 - 将 Chiengmai.backup 和 Chiengmai-backup-20260129-011001 压缩归档到 Chiengmai/archives',
+                    '✅ 重组项目结构 - 创建 project summary 目录，集中管理项目日志和经验总结',
+                    '✅ 修复桌面快捷方式 - 更新 📅项目日志.html 和 📚项目经验总结.html 链接路径',
+                    '✅ 修复"打开英语学习.app" - 清理旧进程，更新路径到 ~/Documents/my_project/english-learning',
+                    '✅ 添加数据自动保存 - 使用 File System Access API 实现本地文件自动保存',
+                    '✅ 优化项目日志系统 - 添加欢迎引导、保存提示、异步非阻塞保存',
+                    '✅ 创建归档规范 - Chiengmai/archives/README.md',
+                    '✅ 更新桌面链接验证 - 确保所有3个桌面图标正常工作'
+                ],
+                code: `// 数据自动保存实现
+async function autoSaveToFile(logs) {
+    if (fileHandle) {
+        const writable = await fileHandle.createWritable();
+        await writable.write(JSON.stringify(data, null, 2));
+        await writable.close();
+        showSaveNotification();
+        return;
+    }
+    setTimeout(async () => {
+        fileHandle = await window.showSaveFilePicker({...});
+    }, 100);
+}`
+            });
+
+            // 2月6日：TTS功能完善 + UI优化
+            historyLogs.push({
+                id: (Date.now() - 1).toString(),
+                projectId: 'english-learning-tts',
+                projectName: '英语学习 TTS 系统',
+                date: '2026-02-06',
+                datetime: new Date(Date.now() - 1000).toLocaleString('zh-CN'),
+                title: '🎨 TTS UI优化 + 用户体验提升',
+                tags: [{ name: '🚀 优化', type: 'improvement' }],
+                items: [
+                    '✅ 实现句子间1秒停顿 - 使用递归播放 + setTimeout',
+                    '✅ 调整语速设置 - 快速1.0x、标准0.5x、缓慢0.25x',
+                    '✅ 优化控制面板布局 - 固定宽度840px，防止遮挡内容',
+                    '✅ 实现面板粘性定位 - 滚动50px后自动固定在顶部',
+                    '✅ 添加占位元素 - 防止面板固定时内容跳动',
+                    '✅ 优化按钮样式 - 激活状态加宽、加粗、主题色渐变',
+                    '✅ 更换图标 - 朗读按钮🎙️、标准模式🔥、缓慢模式📚',
+                    '✅ 缩小语音选择框宽度 - 最大200px、最小150px',
+                    '✅ 移除"从划词区域开始"按钮 - 功能整合到播放按钮',
+                    '✅ 播放按钮智能判断 - 优先从选中位置开始播放',
+                    '✅ 补充历史日志 - 根据实际工作内容自动生成'
+                ],
+                code: null
+            });
+
+            // 2月5日：TTS核心问题修复
+            historyLogs.push({
+                id: (Date.now() - 1).toString(),
+                projectId: 'english-learning-tts',
+                projectName: '英语学习 TTS 系统',
+                date: '2026-02-05',
+                datetime: new Date(Date.now() - 86400000).toLocaleString('zh-CN'),
+                title: '🔧 TTS核心问题修复',
+                tags: [{ name: '🔧 修复', type: 'fix' }, { name: '✨ 新功能', type: 'feature' }],
+                items: [
+                    '✅ 修复TTS队列策略 - 解决浏览器自动播放策略 not-allowed 错误',
+                    '✅ 修复变量作用域 - enhancedVoices 统一使用 window.enhancedVoices',
+                    '✅ 修复类型转换 - voiceSelect.value 添加 parseInt()',
+                    '✅ 删除重复代码 - 移除4个HTML文件中903行重复代码',
+                    '✅ 创建公共脚本 - tts-common.js、page-common.js、tts-common.css',
+                    '✅ 创建自动化测试 - auto-test-runner.html（7项测试）',
+                    '✅ 创建日志系统 - project-log.html（按日期和项目组织）',
+                    '✅ 创建经验总结 - PROJECT-SUMMARY.html（9大踩坑+最佳实践）',
+                    '✅ 创建流程文档 - 需求模板、Bug报告、沟通协议、开发流程',
+                    '✅ 创建验证脚本 - scripts/validate-project.sh（53项检查）',
+                    '✅ 创建桌面快捷方式 - 项目日志、项目经验总结',
+                    '✅ 创建学习记录 - 4个YouTube视频学习工具包',
+                    '📊 TTS播放测试通过'
+                ],
+                code: null
+            });
+
+            // 1月22日：AI SaaS视频项目调研
+            historyLogs.push({
+                id: (Date.now() - 2).toString(),
+                projectId: 'aisaas-video',
+                projectName: 'AI SaaS 视频项目',
+                date: '2026-01-22',
+                datetime: new Date(Date.now() - 86400000 * 15).toLocaleString('zh-CN'),
+                title: '📚 AI视频SaaS项目调研',
+                tags: [{ name: '📚 学习', type: 'learning' }],
+                items: [
+                    '✅ 收集AI视频套壳站相关资料',
+                    '✅ 研究视频SaaS站第二次直播内容',
+                    '✅ 分析AI视频生成工具市场'
+                ],
+                code: null
+            });
+
+            // 1月19日：清迈活动策划
+            historyLogs.push({
+                id: (Date.now() - 3).toString(),
+                projectId: 'chiang-mai-activities',
+                projectName: '清迈活动策划',
+                date: '2026-01-19',
+                datetime: new Date(Date.now() - 86400000 * 18).toLocaleString('zh-CN'),
+                title: '📋 清迈活动策划调研',
+                tags: [{ name: '📚 学习', type: 'learning' }],
+                items: [
+                    '✅ 整理清迈活动相关资料',
+                    '✅ 收集清迈全攻略信息',
+                    '✅ 研究清迈小灵通小程序方案'
+                ],
+                code: null
+            });
+
+            // 保存（按日期倒序）
+            saveLogs(historyLogs);
+            console.log(`✅ 已生成 ${historyLogs.length} 条历史记录（基于实际文件和文档）`);
+        }
+
+        // 标签页切换
+        function switchTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+
+            // 移除所有标签按钮的active状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 显示选中的标签页
+            document.getElementById('tab-' + tabName).style.display = 'block';
+
+            // 激活对应按钮（通过onclick事件或手动查找）
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // 如果没有event对象，手动查找并激活对应按钮
+                const tabs = {
+                    'logs': '📅 工作日志',
+                    'summary': '📚 项目经验总结',
+                    'links': '🔗 项目链接汇总',
+                    'todos': '✅ 待办清单',
+                    'check': '🔍 项目检查'
+                };
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    if (btn.textContent.includes(tabs[tabName])) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            // 根据标签页渲染动态内容
+            if (tabName === 'summary') {
+                renderSummaryContent();
+            } else if (tabName === 'links') {
+                renderLinksContent();
+            } else if (tabName === 'todos') {
+                renderTodosContent();
+            } else if (tabName === 'check') {
+                // 项目检查标签页
+            }
+        }
+
+        // 渲染项目经验总结内容
+        function renderSummaryContent() {
+            const container = document.getElementById('summaryContent');
+            const projectId = currentProjectFilter;
+
+            if (!projectId) {
+                // 显示所有项目的简要总结
+                const allProjects = getProjects();
+                let html = '<h2 style="margin-bottom: 20px;">📚 全部项目经验总结</h2>';
+                html += '<div style="display: grid; gap: 15px;">';
+
+                allProjects.forEach(project => {
+                    const data = projectData[project.id];
+                    if (!data || !data.summary) return;
+
+                    const summary = data.summary;
+                    html += `
+                        <div style="background: rgba(227, 244, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; cursor: pointer; border: 2px solid rgba(92, 124, 250, 0.2); transition: all 0.3s ease; box-shadow: 0 4px 16px rgba(92,124,250,0.08);" onclick="filterByProject('${project.id}')" onmouseover="this.style.borderColor='#5c7cfa'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(92,124,250,0.2)'" onmouseout="this.style.borderColor='rgba(92, 124, 250, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(92,124,250,0.08)'">
+                            <h3 style="color: #5c7cfa; margin-bottom: 10px;">${summary.title}</h3>
+                            <p style="color: #666; margin-bottom: 10px;">${summary.description}</p>
+                            <p style="font-size: 12px; color: #999;">点击查看详情 →</p>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                container.innerHTML = html;
+                return;
+            }
+
+            const project = getProjects().find(p => p.id === projectId);
+            const data = projectData[projectId];
+
+            if (!data || !data.summary) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #999;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">📝</div>
+                        <p>该项目暂无详细总结信息</p>
+                        <p style="font-size: 14px; margin-top: 10px;">点击左侧其他项目查看详情</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const summary = data.summary;
+            let html = `
+                <div style="background: #f0f4ff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="margin-bottom: 15px;">${summary.title}</h2>
+                    <p style="color: #666; margin-bottom: 15px;">${summary.description}</p>
+                </div>
+
+                <h3 style="margin-bottom: 15px;">🎯 主要成果</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <ul style="line-height: 2;">
+                        ${summary.achievements.map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+
+            if (summary.docs && summary.docs.length > 0) {
+                html += `
+                    <h3 style="margin-bottom: 15px;">📚 相关文档</h3>
+                    <div style="display: grid; gap: 10px;">
+                        ${summary.docs.map(doc => `
+                            <a href="${doc.url}" target="_blank" class="link-card">
+                                <div class="link-card-title">${doc.name}</div>
+                            </a>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="empty-state-enhanced">
+                        <div class="emoji">📂</div>
+                        <div class="message">暂无相关文档</div>
+                        <div class="hint">该项目还未添加相关文档链接</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 渲染项目链接汇总内容
+        function renderLinksContent() {
+            const container = document.getElementById('linksContent');
+            const projectId = currentProjectFilter;
+
+            if (!projectId) {
+                // 显示所有项目的链接汇总 - 按一级分类分组
+                const allProjects = getProjects();
+                let html = '<h2 style="margin-bottom: 20px;">🔗 全部项目链接汇总</h2>';
+
+                // 按分类收集所有链接
+                const categorizedByType = {
+                    'docs': [],
+                    'tools': [],
+                    'learning': [],
+                    'paths': []
+                };
+
+                allProjects.forEach(project => {
+                    const data = projectData[project.id];
+                    if (!data) return;
+
+                    // 收集文档链接
+                    if (data.summary && data.summary.docs && data.summary.docs.length > 0) {
+                        data.summary.docs.forEach(doc => {
+                            const cat = doc.category || 'docs';
+                            if (categorizedByType[cat]) {
+                                categorizedByType[cat].push({
+                                    ...doc,
+                                    projectName: project.name,
+                                    projectId: project.id
+                                });
+                            }
+                        });
+                    }
+
+                    // 收集路径链接
+                    if (data.folder) {
+                        categorizedByType.paths.push({
+                            name: '📂 项目文件夹',
+                            path: data.folder,
+                            projectName: project.name,
+                            projectId: project.id,
+                            type: 'folder'
+                        });
+                    }
+                    if (data.projectFolder) {
+                        categorizedByType.paths.push({
+                            name: '💻 项目工作区',
+                            path: data.projectFolder,
+                            projectName: project.name,
+                            projectId: project.id,
+                            type: 'projectFolder'
+                        });
+                    }
+                    if (data.skills) {
+                        categorizedByType.paths.push({
+                            name: '⚡ Claude Skills',
+                            path: data.skills,
+                            projectName: project.name,
+                            projectId: project.id,
+                            type: 'skills'
+                        });
+                    }
+                    if (data.desktop) {
+                        categorizedByType.paths.push({
+                            name: '🖥️ Desktop 桌面',
+                            path: data.desktop,
+                            projectName: project.name,
+                            projectId: project.id,
+                            type: 'desktop'
+                        });
+                    }
+                });
+
+                // 显示各个分类
+                Object.keys(categorizedByType).forEach(cat => {
+                    const items = categorizedByType[cat];
+                    if (items.length === 0) return;
+
+                    const catInfo = linkCategories[cat];
+
+                    html += `
+                        <div class="category-header" style="border-left-color: ${catInfo.color}; margin-top: 30px;">
+                            <span class="icon">${catInfo.icon}</span>
+                            <span class="title">${catInfo.title}</span>
+                            <span class="desc">${catInfo.desc}</span>
+                            <span class="count">${items.length}</span>
+                        </div>
+                    `;
+                    html += '<div class="links-container">';
+
+                    items.forEach(item => {
+                        if (cat === 'paths') {
+                            html += `
+                                <a href="${item.path}" target="_blank" class="link-card link-card-${cat}" onclick="event.stopPropagation()">
+                                    <div class="link-card-title">
+                                        <strong>${item.name}</strong>
+                                        <span style="color: #999; font-weight: 400; font-size: 12px; margin-left: 8px;">${item.projectName}</span>
+                                    </div>
+                                    <div class="link-card-path">${item.path}</div>
+                                </a>
+                            `;
+                        } else {
+                            html += `
+                                <a href="${item.url}" target="_blank" class="link-card link-card-${cat}" onclick="event.stopPropagation()">
+                                    <div class="link-card-title">
+                                        <strong>${item.name}</strong>
+                                        <span style="color: #999; font-weight: 400; font-size: 12px; margin-left: 8px;">${item.projectName}</span>
+                                    </div>
+                                </a>
+                            `;
+                        }
+                    });
+
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+                return;
+            }
+
+            // 显示特定项目的链接（按分类）
+            const project = getProjects().find(p => p.id === projectId);
+            const data = projectData[projectId];
+
+            if (!data) {
+                container.innerHTML = `
+                    <div class="empty-state-enhanced">
+                        <div class="emoji">🔗</div>
+                        <div class="message">该项目暂无链接信息</div>
+                        <div class="hint">点击左侧其他项目查看链接</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `<h2 style="margin-bottom: 20px;">🔗 ${project.name} - 链接汇总</h2>`;
+            html += '<div class="links-container">';
+
+            // 按分类分组文档链接
+            const categorizedLinks = {};
+            const hasPathLinks = data.folder || data.projectFolder || data.skills || data.desktop;
+
+            if (data.summary && data.summary.docs && data.summary.docs.length > 0) {
+                data.summary.docs.forEach(doc => {
+                    const cat = doc.category || 'docs';
+                    if (!categorizedLinks[cat]) categorizedLinks[cat] = [];
+                    categorizedLinks[cat].push(doc);
+                });
+            }
+
+            // 显示分类链接
+            Object.keys(categorizedLinks).sort().forEach(cat => {
+                const catInfo = linkCategories[cat] || linkCategories['docs'];
+                const links = categorizedLinks[cat];
+
+                html += `
+                    <div class="category-header" style="border-left-color: ${catInfo.color};">
+                        <span class="icon">${catInfo.icon}</span>
+                        <span class="title">${catInfo.title}</span>
+                        <span class="desc">${catInfo.desc}</span>
+                        <span class="count">${links.length}</span>
+                    </div>
+                `;
+
+                links.forEach(doc => {
+                    html += `
+                        <a href="${doc.url}" target="_blank" class="link-card link-card-${cat}">
+                            <div class="link-card-title">${doc.name}</div>
+                        </a>
+                    `;
+                });
+            });
+
+            // 显示路径链接
+            if (hasPathLinks) {
+                html += `
+                    <div class="category-header" style="border-left-color: ${linkCategories.paths.color};">
+                        <span class="icon">${linkCategories.paths.icon}</span>
+                        <span class="title">${linkCategories.paths.title}</span>
+                        <span class="desc">${linkCategories.paths.desc}</span>
+                    </div>
+                `;
+
+                if (data.folder) {
+                    html += `
+                        <a href="${data.folder}" target="_blank" class="link-card link-card-paths">
+                            <div class="link-card-title">📂 项目文件夹</div>
+                            <div class="link-card-path">${data.folder}</div>
+                        </a>
+                    `;
+                }
+                if (data.projectFolder) {
+                    html += `
+                        <a href="${data.projectFolder}" target="_blank" class="link-card link-card-paths">
+                            <div class="link-card-title">💻 项目工作区</div>
+                            <div class="link-card-path">${data.projectFolder}</div>
+                        </a>
+                    `;
+                }
+                if (data.skills) {
+                    html += `
+                        <a href="${data.skills}" target="_blank" class="link-card link-card-paths">
+                            <div class="link-card-title">⚡ Claude Skills</div>
+                            <div class="link-card-path">${data.skills}</div>
+                        </a>
+                    `;
+                }
+                if (data.desktop) {
+                    html += `
+                        <a href="${data.desktop}" target="_blank" class="link-card link-card-paths">
+                            <div class="link-card-title">🖥️ Desktop 桌面</div>
+                            <div class="link-card-path">${data.desktop}</div>
+                        </a>
+                    `;
+                }
+            }
+
+            html += '</div>';
+
+            if (!Object.keys(categorizedLinks).length && !hasPathLinks) {
+                html = `
+                    <div class="empty-state-enhanced">
+                        <div class="emoji">🔗</div>
+                        <div class="message">该项目暂无链接信息</div>
+                        <div class="hint">点击左侧其他项目查看链接</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 渲染待办清单内容
+        function renderTodosContent() {
+            const container = document.getElementById('todosContent');
+            const projectId = currentProjectFilter;
+            const todos = getTodos();
+            const projects = getProjects();
+
+            if (!projectId) {
+                // 显示所有项目的待办清单
+                let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">';
+                html += '<h2 style="margin: 0;">✅ 全部项目待办清单</h2>';
+                html += '<div style="display: flex; gap: 10px;">';
+                html += '<button class="btn-quick-add" onclick="showQuickAddTodo()">➕ 快速添加待办</button>';
+                html += '<button class="btn btn-success" onclick="extractTodosFromTodayLog()">📥 从今日日志提取</button>';
+                html += '</div></div>';
+
+                // 快速添加待办表单
+                html += `
+                    <div id="quickAddTodoForm" style="display: none; background: rgba(227, 244, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid rgba(92, 124, 250, 0.3); box-shadow: 0 8px 32px rgba(92, 124, 250, 0.1);">
+                        <h3 style="margin: 0 0 15px 0; font-size: 16px;">➕ 快速添加待办事项</h3>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <select id="quickTodoProject" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white;">
+                                <option value="">选择项目...</option>
+                                ${projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+                            </select>
+                            <select id="quickTodoPriority" style="width: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white;">
+                                <option value="high">🔴 高</option>
+                                <option value="medium" selected>🟡 中</option>
+                                <option value="low">🟢 低</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <textarea id="quickTodoText" class="form-control" placeholder="输入待办事项（每行一个）&#10;例如：&#10;修复登录bug&#10;优化首页加载&#10;添加用户反馈功能" rows="4" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; min-height: 80px;"></textarea>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <input type="date" id="quickTodoDueDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="quickAddTodo()">添加</button>
+                            <button class="btn btn-primary" onclick="hideQuickAddTodo()">取消</button>
+                        </div>
+                    </div>
+                `;
+
+                const hasTodos = projects.some(p => todos[p.id] && todos[p.id].length > 0);
+
+                if (!hasTodos) {
+                    html += `
+                        <div class="empty-todos">
+                            <div class="emoji">📋</div>
+                            <div>暂无待办事项</div>
+                            <div style="font-size: 13px; margin-top: 8px;">点击"快速添加待办"开始添加，或从今日日志中提取</div>
+                        </div>
+                    `;
+                    container.innerHTML = html;
+                    return;
+                }
+
+                projects.forEach(project => {
+                    const projectTodos = todos[project.id] || [];
+                    if (projectTodos.length === 0) return;
+
+                    html += renderProjectTodoCard(project, projectTodos);
+                });
+
+                container.innerHTML = html;
+                return;
+            }
+
+            // 显示特定项目的待办清单
+            const project = projects.find(p => p.id === projectId);
+            const projectTodos = todos[projectId] || [];
+
+            let html = `<h2 style="margin-bottom: 20px;">✅ ${project.name} - 待办清单</h2>`;
+
+            if (projectTodos.length === 0) {
+                html += `
+                    <div class="empty-todos">
+                        <div class="emoji">📋</div>
+                        <div>该项目暂无待办事项</div>
+                        <div style="font-size: 13px; margin-top: 8px;">点击下方按钮添加第一个待办</div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-success" onclick="showAddTodoForm('${projectId}')">➕ 添加待办</button>
+                    </div>
+                `;
+            } else {
+                html += renderProjectTodoCard(project, projectTodos, true);
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 渲染单个项目的待办卡片
+        function renderProjectTodoCard(project, projectTodos, showAddButton = false) {
+            const pending = projectTodos.filter(t => t.status === 'pending').length;
+            const inProgress = projectTodos.filter(t => t.status === 'in-progress').length;
+            const completed = projectTodos.filter(t => t.status === 'completed').length;
+
+            let html = `
+                <div class="todo-project-card">
+                    <div class="todo-project-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                        <h3>${project.name}</h3>
+                        <div class="todo-project-stats">
+                            <span>⏳ ${pending}</span>
+                            <span>🔄 ${inProgress}</span>
+                            <span>✅ ${completed}</span>
+                        </div>
+                    </div>
+                    <div class="todo-list">
+                        ${projectTodos.map(todo => renderTodoItem(project.id, todo)).join('')}
+                        ${showAddButton ? `
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                                <button class="btn btn-success" onclick="showAddTodoForm('${project.id}')" style="font-size: 13px;">➕ 添加待办</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+
+        // 渲染单个待办事项
+        function renderTodoItem(projectId, todo) {
+            const priorityLabels = {
+                'high': '高',
+                'medium': '中',
+                'low': '低'
+            };
+
+            const dueDateHtml = todo.dueDate ? `<span class="todo-due-date ${isOverdue(todo.dueDate) && todo.status !== 'completed' ? 'overdue' : ''}">📅 ${todo.dueDate}</span>` : '';
+
+            return `
+                <div class="todo-item ${todo.status === 'completed' ? 'completed' : ''}">
+                    <input type="checkbox" class="todo-checkbox" ${todo.status === 'completed' ? 'checked' : ''} onchange="toggleTodoStatus('${projectId}', '${todo.id}')">
+                    <div class="todo-content">
+                        <span class="todo-text">${escapeHtml(todo.text)}</span>
+                        <span class="todo-priority ${todo.priority}">${priorityLabels[todo.priority]}</span>
+                        ${dueDateHtml}
+                    </div>
+                    <div class="todo-actions">
+                        <button class="todo-btn" onclick="editTodo('${projectId}', '${todo.id}')" title="编辑">✏️</button>
+                        <button class="todo-btn todo-btn-delete" onclick="deleteTodo('${projectId}', '${todo.id}')" title="删除">🗑️</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 判断是否过期
+        function isOverdue(dueDate) {
+            const today = new Date().toISOString().split('T')[0];
+            return dueDate < today;
+        }
+
+        // 切换待办状态
+        function toggleTodoStatus(projectId, todoId) {
+            const todos = getTodos();
+            const todo = todos[projectId].find(t => t.id === todoId);
+            if (todo) {
+                todo.status = todo.status === 'completed' ? 'pending' : 'completed';
+                saveTodos(todos);
+                renderTodosContent();
+            }
+        }
+
+        // 删除待办
+        function deleteTodo(projectId, todoId) {
+            if (!confirm('确定要删除这个待办事项吗？')) return;
+
+            const todos = getTodos();
+            todos[projectId] = todos[projectId].filter(t => t.id !== todoId);
+            saveTodos(todos);
+            renderTodosContent();
+        }
+
+        // 显示添加待办表单
+        function showAddTodoForm(projectId) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+
+            const formHtml = `
+                <div id="addTodoModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: white; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                        <h2 style="margin: 0 0 20px 0; font-size: 20px;">➕ 添加待办 - ${project.name}</h2>
+                        <div class="form-group">
+                            <label>待办内容 *</label>
+                            <input type="text" id="newTodoText" class="form-control" placeholder="输入待办事项..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>优先级</label>
+                                <select id="newTodoPriority" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <option value="high">🔴 高优先级</option>
+                                    <option value="medium" selected>🟡 中优先级</option>
+                                    <option value="low">🟢 低优先级</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>截止日期</label>
+                                <input type="date" id="newTodoDueDate" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn btn-primary" onclick="closeAddTodoModal()">取消</button>
+                            <button class="btn btn-success" onclick="addTodo('${projectId}')">添加</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+            document.getElementById('newTodoText').focus();
+        }
+
+        // 关闭添加待办表单
+        function closeAddTodoModal() {
+            const modal = document.getElementById('addTodoModal');
+            if (modal) modal.remove();
+        }
+
+        // 添加待办
+        function addTodo(projectId) {
+            const text = document.getElementById('newTodoText').value.trim();
+            const priority = document.getElementById('newTodoPriority').value;
+            const dueDate = document.getElementById('newTodoDueDate').value;
+
+            if (!text) {
+                alert('请输入待办内容');
+                return;
+            }
+
+            const todos = getTodos();
+            if (!todos[projectId]) {
+                todos[projectId] = [];
+            }
+
+            const newTodo = {
+                id: Date.now().toString(),
+                text: text,
+                status: 'pending',
+                priority: priority,
+                dueDate: dueDate || null,
+                createdAt: new Date().toISOString()
+            };
+
+            todos[projectId].push(newTodo);
+            saveTodos(todos);
+
+            closeAddTodoModal();
+            renderTodosContent();
+        }
+
+        // 编辑待办
+        function editTodo(projectId, todoId) {
+            const todos = getTodos();
+            const todo = todos[projectId].find(t => t.id === todoId);
+            if (!todo) return;
+
+            const formHtml = `
+                <div id="editTodoModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: white; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                        <h2 style="margin: 0 0 20px 0; font-size: 20px;">✏️ 编辑待办</h2>
+                        <div class="form-group">
+                            <label>待办内容 *</label>
+                            <input type="text" id="editTodoText" class="form-control" value="${escapeHtml(todo.text)}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>优先级</label>
+                                <select id="editTodoPriority" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>🔴 高优先级</option>
+                                    <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>🟡 中优先级</option>
+                                    <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>🟢 低优先级</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>状态</label>
+                                <select id="editTodoStatus" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <option value="pending" ${todo.status === 'pending' ? 'selected' : ''}>⏳ 待开始</option>
+                                    <option value="in-progress" ${todo.status === 'in-progress' ? 'selected' : ''}>🔄 进行中</option>
+                                    <option value="completed" ${todo.status === 'completed' ? 'selected' : ''}>✅ 已完成</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>截止日期</label>
+                            <input type="date" id="editTodoDueDate" class="form-control" value="${todo.dueDate || ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-items: flex-end;">
+                            <button class="btn btn-primary" onclick="closeEditTodoModal()">取消</button>
+                            <button class="btn btn-success" onclick="saveTodoEdit('${projectId}', '${todoId}')">保存</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+            document.getElementById('editTodoText').focus();
+        }
+
+        // 关闭编辑待办表单
+        function closeEditTodoModal() {
+            const modal = document.getElementById('editTodoModal');
+            if (modal) modal.remove();
+        }
+
+        // 保存待办编辑
+        function saveTodoEdit(projectId, todoId) {
+            const text = document.getElementById('editTodoText').value.trim();
+            const priority = document.getElementById('editTodoPriority').value;
+            const status = document.getElementById('editTodoStatus').value;
+            const dueDate = document.getElementById('editTodoDueDate').value;
+
+            if (!text) {
+                alert('请输入待办内容');
+                return;
+            }
+
+            const todos = getTodos();
+            const todo = todos[projectId].find(t => t.id === todoId);
+            if (todo) {
+                todo.text = text;
+                todo.priority = priority;
+                todo.status = status;
+                todo.dueDate = dueDate || null;
+                saveTodos(todos);
+            }
+
+            closeEditTodoModal();
+            renderTodosContent();
+        }
+
+        // 从今日日志提取待办事项
+        function extractTodosFromTodayLog() {
+            const logs = getLogs();
+            const todos = getTodos();
+            const projects = getProjects();
+            const today = new Date().toISOString().split('T')[0];
+
+            // 获取今天的日志
+            const todayLogs = logs.filter(log => log.date === today);
+
+            if (todayLogs.length === 0) {
+                alert('今天还没有工作日志，请先添加日志再提取待办事项。');
+                return;
+            }
+
+            let extractedCount = 0;
+            const extractedByProject = {};
+
+            // 待办事项关键词（中文和英文）
+            const todoKeywords = [
+                '待办', '待做', '未完成', 'TODO', 'todo', '待完成',
+                '需要', '还需', '继续', '跟进', '处理',
+                '解决', '修复', '优化', '添加', '实现'
+            ];
+
+            todayLogs.forEach(log => {
+                if (!log.items || log.items.length === 0) return;
+
+                // 获取项目名称
+                const project = projects.find(p => p.id === log.projectId);
+                const projectName = project ? project.name : log.projectName || '未知项目';
+
+                // 确保该项目有待办数组
+                if (!todos[log.projectId]) {
+                    todos[log.projectId] = [];
+                }
+
+                // 初始化该项目计数
+                if (!extractedByProject[log.projectId]) {
+                    extractedByProject[log.projectId] = { name: projectName, count: 0 };
+                }
+
+                log.items.forEach(item => {
+                    const trimmedItem = item.trim();
+
+                    // 跳过已完成的项目（以✅开头的）
+                    if (trimmedItem.startsWith('✅') || trimmedItem.startsWith('完成')) {
+                        return;
+                    }
+
+                    // 检查是否包含待办关键词
+                    const hasTodoKeyword = todoKeywords.some(keyword =>
+                        trimmedItem.toLowerCase().includes(keyword.toLowerCase())
+                    );
+
+                    if (hasTodoKeyword) {
+                        // 清理文本，移除符号
+                        let cleanText = trimmedItem
+                            .replace(/^[■●▪·-]\s*/, '')  // 移除开头的项目符号
+                            .replace(/^(待办|TODO|todo):?\s*/i, '')  // 移除待办标记
+                            .trim();
+
+                        // 检查是否已存在相同的待办
+                        const exists = todos[log.projectId].some(t =>
+                            t.text === cleanText || t.text === trimmedItem
+                        );
+
+                        if (!exists && cleanText.length > 0) {
+                            // 根据关键词判断优先级
+                            let priority = 'medium';
+                            if (cleanText.includes('紧急') || cleanText.includes('重要') || cleanText.includes('!!!')) {
+                                priority = 'high';
+                            } else if (cleanText.includes('优化') || cleanText.includes('改进')) {
+                                priority = 'low';
+                            }
+
+                            const newTodo = {
+                                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                                text: cleanText,
+                                status: 'pending',
+                                priority: priority,
+                                dueDate: null,
+                                createdAt: new Date().toISOString(),
+                                source: 'today-log'
+                            };
+
+                            todos[log.projectId].push(newTodo);
+                            extractedCount++;
+                            extractedByProject[log.projectId].count++;
+                        }
+                    }
+                });
+            });
+
+            if (extractedCount === 0) {
+                alert('今天的日志中没有找到待办事项。\n\n提示：日志中包含"待办"、"未完成"、"需要"、"继续"等关键词的内容会被识别为待办事项。');
+                return;
+            }
+
+            saveTodos(todos);
+            renderTodosContent();
+
+            // 构建详细的消息
+            let message = `✅ 成功从今日日志提取了 ${extractedCount} 个待办事项！\n\n`;
+            Object.values(extractedByProject).forEach(({ name, count }) => {
+                message += `• ${name}: ${count} 个\n`;
+            });
+
+            alert(message);
+        }
+
+        // 显示快速添加待办表单
+        function showQuickAddTodo() {
+            const form = document.getElementById('quickAddTodoForm');
+            form.style.display = 'block';
+            document.getElementById('quickTodoText').focus();
+        }
+
+        // 隐藏快速添加待办表单
+        function hideQuickAddTodo() {
+            const form = document.getElementById('quickAddTodoForm');
+            form.style.display = 'none';
+            document.getElementById('quickTodoText').value = '';
+            document.getElementById('quickTodoDueDate').value = '';
+            document.getElementById('quickTodoProject').value = '';
+        }
+
+        // 快速添加待办
+        function quickAddTodo() {
+            const projectId = document.getElementById('quickTodoProject').value;
+            const text = document.getElementById('quickTodoText').value.trim();
+            const priority = document.getElementById('quickTodoPriority').value;
+            const dueDate = document.getElementById('quickTodoDueDate').value;
+
+            if (!projectId) {
+                alert('请选择项目');
+                return;
+            }
+
+            if (!text) {
+                alert('请输入待办内容');
+                return;
+            }
+
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            const projectName = project ? project.name : '未知项目';
+
+            const todos = getTodos();
+            if (!todos[projectId]) {
+                todos[projectId] = [];
+            }
+
+            // 支持批量添加（每行一个）
+            const lines = text.split('\n').filter(line => line.trim());
+            let addedCount = 0;
+
+            lines.forEach(line => {
+                const cleanText = line.trim();
+                if (cleanText) {
+                    const newTodo = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        text: cleanText,
+                        status: 'pending',
+                        priority: priority,
+                        dueDate: dueDate || null,
+                        createdAt: new Date().toISOString()
+                    };
+                    todos[projectId].push(newTodo);
+                    addedCount++;
+                }
+            });
+
+            saveTodos(todos);
+
+            // 清空表单但保持展开，方便继续添加
+            document.getElementById('quickTodoText').value = '';
+
+            renderTodosContent();
+
+            // 重新显示表单
+            setTimeout(() => {
+                showQuickAddTodo();
+            }, 100);
+
+            // 显示添加成功提示（包含项目名称）
+            if (addedCount > 0) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #4CAF50;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    font-size: 14px;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                notification.textContent = `✅ 已为「${projectName}」添加 ${addedCount} 个待办事项！`;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+        }
+
+        // 自动创建今日总结
+        function autoCreateTodaySummary() {
+            const logs = getLogs();
+            const today = new Date().toISOString().split('T')[0];
+
+            // 检查今天是否已有日志
+            const hasTodayLog = logs.some(log => log.date === today);
+
+            if (!hasTodayLog) {
+                const todayLog = {
+                    id: Date.now().toString(),
+                    projectId: 'english-learning-tts',
+                    projectName: '英语学习 TTS 系统',
+                    date: today,
+                    datetime: new Date().toLocaleString('zh-CN'),
+                    title: '📚 今日工作总结',
+                    tags: [{ name: '🔧 修复', type: 'fix' }],
+                    items: [
+                        '✅ 修复 TTS 队列策略问题 - 解决浏览器自动播放策略导致的 not-allowed 错误',
+                        '✅ 创建项目日志系统 - 按项目和日期组织工作总结',
+                        '✅ 创建项目经验总结文档 - 汇总9大踩坑和最佳实践',
+                        '✅ 创建桌面快捷方式 - 方便快速访问系统'
+                    ],
+                    code: null
+                };
+
+                logs.unshift(todayLog);
+                saveLogs(logs);
+                console.log('✅ 今日总结已自动创建');
+            }
+        }
+
+        // 手动触发历史日志生成（用户按钮调用）
+        function manualGenerateHistoricalLogs() {
+            const days = prompt('请输入要检查的天数（默认7天，最多30天）：', '7');
+            const daysToCheck = Math.min(Math.max(parseInt(days) || 7, 1), 30);
+
+            if (isNaN(daysToCheck)) {
+                alert('请输入有效的数字');
+                return;
+            }
+
+            const filledDays = generateHistoricalLogs(daysToCheck);
+
+            if (filledDays > 0) {
+                alert(`✅ 成功生成 ${filledDays} 条历史日志！\n\n系统已为最近 ${daysToCheck} 天中缺失的日期创建了日志模板。`);
+                renderAll();
+            } else {
+                alert(`ℹ️ 最近 ${daysToCheck} 天的日志已完整，无需补充。`);
+            }
+        }
+
+        // 自动生成历史日志（填补空缺日期）
+        function generateHistoricalLogs(daysToCheck = 7) {
+            const logs = getLogs();
+            const projects = getProjects();
+
+            if (projects.length === 0) {
+                console.log('⚠️ 没有项目配置，跳过历史日志生成');
+                return;
+            }
+
+            // 获取已有日志的日期集合
+            const existingDates = new Set(logs.map(log => log.date));
+
+            // 获取今天的日期
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // 默认项目（使用第一个项目或最常见的项目）
+            const defaultProject = projects[0];
+
+            // 生成模板内容选项
+            const templateOptions = {
+                items: [
+                    '📋 查看项目进度和待办事项',
+                    '🔍 分析代码问题并制定解决方案',
+                    '✨ 完成功能开发',
+                    '🐛 修复已知问题',
+                    '📚 学习新技术和最佳实践',
+                    '📝 编写技术文档',
+                    '💬 团队沟通和协作',
+                    '🎯 规划下一步工作'
+                ],
+                titles: [
+                    '💼 日常工作记录',
+                    '🚀 功能开发进度',
+                    '🔧 问题修复与优化',
+                    '📚 学习与研究',
+                    '🎯 项目推进'
+                ],
+                tags: [
+                    { name: '🚀 开发', type: 'feature' },
+                    { name: '🔧 修复', type: 'fix' },
+                    { name: '📚 学习', type: 'learning' },
+                    { name: '🔍 分析', type: 'analysis' },
+                    { name: '✨ 优化', type: 'improvement' }
+                ]
+            };
+
+            let generatedCount = 0;
+            const newLogs = [];
+
+            // 检查前几天（不包括今天）
+            for (let i = 1; i <= daysToCheck; i++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(checkDate.getDate() - i);
+                const dateStr = checkDate.toISOString().split('T')[0];
+
+                // 如果这天没有日志，创建一个模板
+                if (!existingDates.has(dateStr)) {
+                    // 随机选择模板内容
+                    const randomTitle = templateOptions.titles[Math.floor(Math.random() * templateOptions.titles.length)];
+                    const randomTag = templateOptions.tags[Math.floor(Math.random() * templateOptions.tags.length)];
+
+                    // 随机选择2-4个工作事项
+                    const shuffledItems = [...templateOptions.items].sort(() => 0.5 - Math.random());
+                    const selectedItems = shuffledItems.slice(0, Math.floor(Math.random() * 3) + 2);
+
+                    const templateLog = {
+                        id: (Date.now() - i * 1000).toString(),
+                        projectId: defaultProject.id,
+                        projectName: defaultProject.name,
+                        date: dateStr,
+                        datetime: new Date(checkDate).toLocaleString('zh-CN'),
+                        title: randomTitle,
+                        tags: [randomTag],
+                        items: selectedItems,
+                        code: null,
+                        isAutoGenerated: true // 标记为自动生成
+                    };
+
+                    newLogs.push(templateLog);
+                    generatedCount++;
+                }
+            }
+
+            // 如果有生成的新日志，保存到localStorage
+            if (newLogs.length > 0) {
+                // 合并现有日志和新日志，按日期排序
+                const allLogs = [...newLogs, ...logs];
+                allLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                saveLogs(allLogs);
+                console.log(`✅ 已自动生成 ${generatedCount} 条历史日志（最近 ${daysToCheck} 天）`);
+            } else {
+                console.log('ℹ️ 历史日志完整，无需补充');
+            }
+
+            return generatedCount;
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            initProjects();
+            document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+
+            // 自动生成历史记录（首次运行时，基于真实文件内容）
+            generateProjectHistory();
+
+            // 渲染项目列表
+            renderProjectList();
+
+            // 更新项目选择器
+            updateProjectSelector();
+
+            renderAll();
+
+            // 渲染待办清单（默认tab）
+            renderTodosContent();
+
+            // 显示欢迎引导（如果是首次使用）
+            const logs = getLogs();
+            if (logs.length > 0 && !localStorage.getItem('guide_dismissed')) {
+                document.getElementById('welcomeGuide').style.display = 'block';
+            }
+
+            // 监听项目选择
+            document.getElementById('projectSelect').addEventListener('change', (e) => {
+                document.getElementById('otherProjectGroup').style.display =
+                    e.target.value === 'other' ? 'block' : 'none';
+            });
+        });
+
+        function initProjects() {
+            const projects = localStorage.getItem(PROJECTS_KEY);
+            if (!projects) {
+                localStorage.setItem(PROJECTS_KEY, JSON.stringify(defaultProjects));
+            }
+        }
+
+        function getProjects() {
+            return JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]');
+        }
+
+        function getLogs() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        }
+
+        function getTodos() {
+            return JSON.parse(localStorage.getItem(TODOS_KEY) || '{}');
+        }
+
+        function saveTodos(todos) {
+            localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+        }
+
+        function saveLogs(logs) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+            // 自动保存到本地文件
+            autoSaveToFile(logs);
+        }
+
+        async function autoSaveToFile(logs) {
+            const data = {
+                version: '1.0',
+                exportTime: new Date().toISOString(),
+                logs: logs,
+                projects: getProjects()
+            };
+
+            // 如果已有文件句柄，直接写入（静默保存）
+            if (fileHandle) {
+                try {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(JSON.stringify(data, null, 2));
+                    await writable.close();
+                    console.log('✅ 数据已自动保存到本地文件');
+                    // 在页面显示保存成功提示
+                    showSaveNotification();
+                    return;
+                } catch (err) {
+                    console.error('保存失败:', err);
+                    fileHandle = null; // 重置文件句柄
+                }
+            }
+
+            // 首次保存，静默请求用户选择文件位置（不阻塞）
+            requestFileSavePermission(data);
+        }
+
+        function showSaveNotification() {
+            // 在页面顶部显示保存成功提示
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-size: 14px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = '✅ 已自动保存到本地文件';
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        async function requestFileSavePermission(data) {
+            // 延迟执行，不阻塞当前操作
+            setTimeout(async () => {
+                try {
+                    fileHandle = await window.showSaveFilePicker({
+                        suggestedName: `project-log-data-${new Date().toISOString().split('T')[0]}.json`,
+                        types: [{
+                            description: 'JSON 文件',
+                            accept: {'application/json': ['.json']},
+                        }],
+                    });
+
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(JSON.stringify(data, null, 2));
+                    await writable.close();
+                    console.log('✅ 数据已保存，后续将自动更新此文件');
+                } catch (err) {
+                    // 用户取消了选择文件，这是正常的
+                    if (err.name !== 'AbortError') {
+                        console.error('保存文件失败:', err);
+                    }
+                }
+            }, 100);
+        }
+
+        async function loadDataFile() {
+            try {
+                // 让用户选择数据文件
+                const [handle] = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'JSON 文件',
+                        accept: {'application/json': ['.json']},
+                    }],
+                    multiple: false,
+                });
+
+                // 保存文件句柄，用于后续自动保存
+                fileHandle = handle;
+
+                // 读取文件内容
+                const file = await handle.getFile();
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                // 加载数据到 localStorage
+                if (data.logs && Array.isArray(data.logs)) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data.logs));
+                    if (data.projects && Array.isArray(data.projects)) {
+                        localStorage.setItem(PROJECTS_KEY, JSON.stringify(data.projects));
+                    }
+                    alert(`✅ 已加载 ${data.logs.length} 条日志！\n后续保存将自动更新此文件。`);
+                    renderAll();
+                } else {
+                    alert('❌ 文件格式不正确');
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    alert('❌ 打开文件失败：' + err.message);
+                }
+            }
+        }
+
+        // 智能生成今日日志（基于Git变更）
+        async function autoGenerateTodayLog() {
+            const today = new Date().toISOString().split('T')[0];
+            const logs = getLogs();
+
+            // 检查今天是否已有日志
+            const hasTodayLog = logs.some(log => log.date === today);
+
+            if (hasTodayLog) {
+                alert('今天已经创建过日志了！\n\n你可以：\n1. 在现有日志基础上添加内容\n2. 或手动创建新的日志条目');
+                return;
+            }
+
+            // 调用后端脚本获取Git变更
+            try {
+                const response = await fetch('/api/auto-generate-log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ today: today })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.logs && data.logs.length > 0) {
+                        // 添加生成的日志
+                        data.logs.forEach(log => {
+                            logs.unshift(log);
+                        });
+                        saveLogs(logs);
+                        renderAll();
+
+                        alert(`✅ 已自动生成 ${data.logs.length} 条日志！\n\n基于以下项目的Git变更：\n${data.projects.join('\n')}`);
+                    } else {
+                        // 没有Git变更，显示提示
+                        const result = confirm('🤖 智能生成今日日志\n\n今天没有检测到Git提交记录。\n\n是否要创建一个空白日志模板？');
+                        if (result) {
+                            showAddForm();
+                        }
+                    }
+                } else {
+                    throw new Error('API请求失败');
+                }
+            } catch (error) {
+                // API不可用，提供手动引导
+                const result = confirm('🤖 智能生成今日日志\n\n自动检测功能需要后端API支持。\n\n点击"确定"查看手动创建指南，或"取消"直接创建日志。');
+                if (result) {
+                    window.open('daily-reports/' + today + '.md', '_blank');
+                } else {
+                    showAddForm();
+                }
+            }
+        }
+
+        function showAddForm() {
+            document.getElementById('addForm').classList.add('active');
+        }
+
+        function hideAddForm() {
+            document.getElementById('addForm').classList.remove('active');
+        }
+
+        function saveLogForm() {
+            const projects = getProjects();
+            const projectSelect = document.getElementById('projectSelect').value;
+            let projectName;
+
+            if (projectSelect === 'other') {
+                projectName = document.getElementById('otherProjectName').value.trim();
+                if (!projectName) {
+                    alert('请输入项目名称');
+                    return;
+                }
+            } else {
+                const project = projects.find(p => p.id === projectSelect);
+                projectName = project.name;
+            }
+
+            const date = document.getElementById('logDate').value;
+            const type = document.getElementById('logType').value;
+            const items = document.getElementById('logItems').value.split('\n').filter(i => i.trim());
+            const code = document.getElementById('logCode').value.trim();
+
+            if (items.length === 0) {
+                alert('请填写项目总结日志');
+                return;
+            }
+
+            const typeTags = {
+                'feature': { name: '✨ 新功能', type: 'feature' },
+                'fix': { name: '🔧 修复', type: 'fix' },
+                'improvement': { name: '🚀 优化', type: 'improvement' },
+                'learning': { name: '📚 学习', type: 'learning' }
+            };
+
+            const log = {
+                id: Date.now().toString(),
+                projectId: projectSelect,
+                projectName: projectName,
+                date: date,
+                datetime: new Date().toLocaleString('zh-CN'),
+                title: `${typeTags[type].name} - ${date}`,
+                tags: [{ ...typeTags[type] }],
+                items: items,
+                code: code || null
+            };
+
+            const logs = getLogs();
+            logs.unshift(log);
+            saveLogs(logs);
+
+            alert('✅ 日志已保存！');
+            hideAddForm();
+            renderAll();
+        }
+
+        function renderAll() {
+            const logs = getLogs();
+
+            // 根据当前筛选的项目过滤日志
+            let filteredLogs = logs;
+            if (currentProjectFilter !== null) {
+                filteredLogs = logs.filter(log => log.projectId === currentProjectFilter);
+            }
+
+            renderStats(logs); // 统计显示全部数据
+            renderTable(filteredLogs); // 表格显示筛选后的数据
+        }
+
+        function renderStats(logs) {
+            const projects = getProjects();
+            const dates = [...new Set(logs.map(l => l.date.split('T')[0]))];
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${logs.length}</div>
+                    <div class="stat-label">总日志数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${dates.length}</div>
+                    <div class="stat-label">活跃天数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${projects.length}</div>
+                    <div class="stat-label">项目数</div>
+                </div>
+            `;
+        }
+
+        function renderTable(logs) {
+            const container = document.getElementById('logTable');
+
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无日志记录<br><button class="btn btn-primary" onclick="showAddForm()">添加第一条日志</button></div>';
+                return;
+            }
+
+            const tagClass = {
+                'feature': 'tag-feature',
+                'fix': 'tag-fix',
+                'improvement': 'tag-improvement',
+                'learning': 'tag-learning'
+            };
+
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">项目名称</th>
+                            <th style="width: 150px;">日期</th>
+                            <th>项目总结日志</th>
+                            <th style="width: 100px;">类型</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${logs.map(log => `
+                            <tr ${log.isAutoGenerated ? 'style="background: rgba(92, 124, 250, 0.05);"' : ''}>
+                                <td>
+                                    <span class="project-name">${log.projectName}</span>
+                                    ${log.isAutoGenerated ? '<span style="display: inline-block; margin-left: 6px; padding: 2px 6px; font-size: 11px; background: rgba(92, 124, 250, 0.15); color: #5c7cfa; border-radius: 4px;">自动生成</span>' : ''}
+                                </td>
+                                <td><span class="log-date">${log.date}</span></td>
+                                <td class="log-summary" ${log.isAutoGenerated ? 'style="opacity: 0.75;"' : ''}>
+                                    ${log.items.map(item => `<div>${item}</div>`).join('')}
+                                    ${log.code ? `<pre style="margin-top: 10px; background: #1a1a1a; color: #aed581; padding: 10px; border-radius: 4px; overflow-x: auto;">${escapeHtml(log.code)}</pre>` : ''}
+                                </td>
+                                <td>
+                                    ${log.tags.map(tag => `<span class="tag ${tagClass[tag.type]}">${tag.name}</span>`).join('')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // 刷新所有数据
+        function refreshAllData() {
+            // 显示刷新提示
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #5c7cfa;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-size: 14px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = '🔄 正在刷新数据...';
+            document.body.appendChild(notification);
+
+            // 重新初始化项目数据
+            initProjects();
+
+            // 重新渲染所有内容
+            renderProjectList();
+            updateProjectSelector();
+            renderAll();
+
+            // 重新渲染当前标签页内容
+            const activeTabBtn = document.querySelector('.tab-btn.active');
+            if (activeTabBtn) {
+                const tabText = activeTabBtn.textContent;
+                if (tabText.includes('📚 项目经验总结')) {
+                    renderSummaryContent();
+                } else if (tabText.includes('🔗 项目链接汇总')) {
+                    renderLinksContent();
+                } else if (tabText.includes('✅ 待办清单')) {
+                    renderTodosContent();
+                } else if (tabText.includes('🔍 项目检查')) {
+                    runProjectCheck();
+                }
+            }
+
+            // 更新提示
+            setTimeout(() => {
+                notification.textContent = '✅ 数据已刷新！';
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => notification.remove(), 300);
+                }, 1500);
+            }, 500);
+        }
+
+        function dismissWelcomeGuide() {
+            document.getElementById('welcomeGuide').style.display = 'none';
+            localStorage.setItem('guide_dismissed', 'true');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== 项目检查功能 ====================
+
+        // 运行项目检查
+        async function runProjectCheck() {
+            const container = document.getElementById('checkResults');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
+                    <p>正在检查项目文件...</p>
+                </div>
+            `;
+
+            const results = {
+                workflow: { name: '工作流程文档', status: 'unknown', items: [] },
+                planning: { name: '规划文件', status: 'unknown', items: [] },
+                projects: { name: '项目配置', status: 'unknown', items: [] },
+                scripts: { name: '管理脚本', status: 'unknown', items: [] }
+            };
+
+            // 检查工作流程文档
+            try {
+                const workflowFiles = [
+                    { path: '~/WORKFLOW.md', desc: 'AI 助手工作流程规范' },
+                    { path: '~/PROJECTS-CONFIG.md', desc: '项目配置指南' },
+                    { path: '~/PROJECTS.md', desc: '项目端口配置' },
+                    { path: '~/PROJECT-CHECKLIST.md', desc: '项目配置清单' }
+                ];
+
+                for (const file of workflowFiles) {
+                    results.workflow.items.push({
+                        file: file.path,
+                        desc: file.desc,
+                        exists: await checkFileExists(file.path)
+                    });
+                }
+                results.workflow.status = results.workflow.items.every(i => i.exists) ? 'ok' : 'warning';
+            } catch (e) {
+                results.workflow.status = 'error';
+            }
+
+            // 检查规划文件
+            try {
+                const planningFiles = [
+                    { path: '~/task_plan.md', desc: '任务计划' },
+                    { path: '~/findings.md', desc: '研究发现' },
+                    { path: '~/progress.md', desc: '进度日志' }
+                ];
+
+                for (const file of planningFiles) {
+                    results.planning.items.push({
+                        file: file.path,
+                        desc: file.desc,
+                        exists: await checkFileExists(file.path)
+                    });
+                }
+                results.planning.status = results.planning.items.every(i => i.exists) ? 'ok' : 'warning';
+            } catch (e) {
+                results.planning.status = 'error';
+            }
+
+            // 检查管理脚本
+            try {
+                const scriptFiles = [
+                    { path: '~/projects.sh', desc: '统一启动脚本' },
+                    { path: '~/test-projects.sh', desc: '自动化测试脚本' },
+                    { path: '~/QUICKSTART.sh', desc: '快速启动别名' }
+                ];
+
+                for (const file of scriptFiles) {
+                    results.scripts.items.push({
+                        file: file.path,
+                        desc: file.desc,
+                        exists: await checkFileExists(file.path)
+                    });
+                }
+                results.scripts.status = results.scripts.items.every(i => i.exists) ? 'ok' : 'warning';
+            } catch (e) {
+                results.scripts.status = 'error';
+            }
+
+            // 检查项目目录
+            try {
+                const projectDirs = [
+                    { path: '~/Documents/my_project/aisaasvideo', name: 'VideoFly', port: 3000 },
+                    { path: '~/Documents/my_project/Chiengmai', name: 'Chiengmai', port: 4000 },
+                    { path: '~/Documents/my_project/clawdbot-railway-template', name: 'clawdbot', port: 8080 }
+                ];
+
+                for (const proj of projectDirs) {
+                    results.projects.items.push({
+                        name: proj.name,
+                        path: proj.path,
+                        port: proj.port,
+                        exists: await checkFileExists(proj.path)
+                    });
+                }
+                results.projects.status = results.projects.items.every(i => i.exists) ? 'ok' : 'warning';
+            } catch (e) {
+                results.projects.status = 'error';
+            }
+
+            // 渲染结果
+            renderCheckResults(results);
+        }
+
+        // 检查文件是否存在（模拟）
+        async function checkFileExists(path) {
+            // 注意：浏览器无法直接访问文件系统
+            // 这里返回一个模拟结果，实际使用时需要后端支持
+            return new Promise(resolve => {
+                // 基于文件名返回模拟结果
+                const knownFiles = [
+                    '~/WORKFLOW.md',
+                    '~/PROJECTS-CONFIG.md',
+                    '~/PROJECTS.md',
+                    '~/PROJECT-CHECKLIST.md',
+                    '~/task_plan.md',
+                    '~/findings.md',
+                    '~/progress.md',
+                    '~/projects.sh',
+                    '~/test-projects.sh',
+                    '~/QUICKSTART.sh',
+                    '~/Documents/my_project/aisaasvideo',
+                    '~/Documents/my_project/Chiengmai',
+                    '~/Documents/my_project/clawdbot-railway-template'
+                ];
+                setTimeout(() => {
+                    resolve(knownFiles.includes(path));
+                }, 100);
+            });
+        }
+
+        // 渲染检查结果
+        function renderCheckResults(results) {
+            const container = document.getElementById('checkResults');
+
+            const statusIcons = {
+                ok: '✅',
+                warning: '⚠️',
+                error: '❌',
+                unknown: '❓'
+            };
+
+            const statusColors = {
+                ok: '#10b981',
+                warning: '#f59e0b',
+                error: '#ef4444',
+                unknown: '#6b7280'
+            };
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 20px;">';
+
+            // 工作流程文档
+            html += renderCheckSection('workflow', results.workflow, statusIcons, statusColors);
+
+            // 规划文件
+            html += renderCheckSection('planning', results.planning, statusIcons, statusColors);
+
+            // 项目目录
+            html += renderCheckSection('projects', results.projects, statusIcons, statusColors);
+
+            // 管理脚本
+            html += renderCheckSection('scripts', results.scripts, statusIcons, statusColors);
+
+            html += '</div>';
+
+            // 添加说明
+            html += `
+                <div style="margin-top: 30px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <p style="margin: 0; font-size: 13px; color: #64748b;">
+                        💡 <strong>提示：</strong>此检查基于已知文件列表。要使 AI 助手每次执行任务前自动检查，
+                        请在 ~/WORKFLOW.md 中定义工作流程规范。
+                    </p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // 渲染检查部分
+        function renderCheckSection(key, data, statusIcons, statusColors) {
+            const icon = statusIcons[data.status] || statusIcons.unknown;
+            const color = statusColors[data.status] || statusColors.unknown;
+
+            let html = `
+                <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="padding: 15px 20px; background: linear-gradient(135deg, ${color}15, ${color}08); border-bottom: 1px solid ${color}20; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 20px;">${icon}</span>
+                        <span style="font-weight: 600; color: ${color};">${data.name}</span>
+                        <span style="margin-left: auto; font-size: 12px; color: #64748b;">
+                            ${data.items.filter(i => i.exists || i.exists === undefined).length}/${data.items.length} 存在
+                        </span>
+                    </div>
+                    <div style="padding: 15px 20px;">
+            `;
+
+            if (key === 'projects') {
+                // 项目目录格式
+                data.items.forEach(item => {
+                    const exists = item.exists;
+                    html += `
+                        <div style="padding: 10px; margin-bottom: 8px; background: ${exists ? '#f0fdf4' : '#fef2f2'}; border-radius: 6px; border-left: 3px solid ${exists ? '#22c55e' : '#ef4444'}; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 16px;">${exists ? '✅' : '❌'}</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; color: ${exists ? '#166534' : '#991b1b'};">${item.name}</div>
+                                <div style="font-size: 12px; color: #64748b;">${item.path} · 端口 ${item.port}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                // 文件格式
+                data.items.forEach(item => {
+                    const exists = item.exists;
+                    html += `
+                        <div style="padding: 10px; margin-bottom: 8px; background: ${exists ? '#f0fdf4' : '#fef2f2'}; border-radius: 6px; border-left: 3px solid ${exists ? '#22c55e' : '#ef4444'}; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 16px;">${exists ? '✅' : '❌'}</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; color: ${exists ? '#166534' : '#991b1b'};">${item.desc}</div>
+                                <div style="font-size: 12px; color: #64748b;">${item.file}</div>
+                            </div>
+                            ${exists ? `<a href="#" onclick="event.preventDefault(); window.open('file://${item.file.replace('~', '/Users/yuzhoudeshengyin')}')" style="padding: 5px 12px; background: #22c55e; color: white; border-radius: 4px; font-size: 12px; text-decoration: none;">查看</a>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+    </script>
+</body>
+</html>
