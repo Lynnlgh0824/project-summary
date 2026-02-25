@@ -1,0 +1,9 @@
+{
+  "app": {
+    "name": "$(basename $PROJECT)",
+    "version": "1.0.0",
+    "description": "项目配置"
+  },
+  "env": "development",
+  "features": {}
+}

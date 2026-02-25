@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 缓存文件
+.project-cache.json
+*.backup
+
+# Node modules (如果有)
+node_modules/
+
+# 日志数据
+data.json
+daily-reports/*.json
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
