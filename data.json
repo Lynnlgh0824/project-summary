@@ -1,0 +1,121 @@
+{
+  "records": [
+    {
+      "id": "2026-02-06-month-alone-chiang-mai",
+      "title": "A Month Alone in Chiang Mai, Thailand",
+      "date": "2026-02-06",
+      "type": "youtube",
+      "typeLabel": "YouTube 视频",
+      "file": "2026-02-06-month-alone-chiang-mai.html",
+      "preview": "数字游民在清迈独自生活一个月的vlog，探讨心理健康、独自旅行、数字游民生活方式、工作生活平衡等核心主题。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
+      "wordCount": 20,
+      "expressionCount": 15,
+      "url": "https://www.youtube.com/watch?v=66MgD1FAZDA",
+      "timestamp": "2026-02-06T00:00:00",
+      "config": {
+        "wordCount": 20,
+        "expressionCount": 15,
+        "sentencePatternCount": 8,
+        "includeReadingQuiz": true,
+        "quizCount": 5,
+        "includeWritingPractice": true,
+        "practiceCount": 3,
+        "difficultyLevel": "intermediate"
+      }
+    },
+    {
+      "id": "2026-02-06-shanghai-starting-over",
+      "title": "I Moved to Shanghai - Starting Over in My 30s",
+      "date": "2026-02-06",
+      "type": "youtube",
+      "typeLabel": "YouTube 视频",
+      "file": "2026-02-06-shanghai-starting-over.html",
+      "preview": "创作者Evelyn在30多岁时搬到上海重新开始的故事，探讨不存在完美的城市、重新开始的勇气、建立归属感等主题。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
+      "wordCount": 20,
+      "expressionCount": 15,
+      "url": "https://www.youtube.com/watch?v=vQNVQIZySxU",
+      "timestamp": "2026-02-06T00:30:00",
+      "config": {
+        "wordCount": 20,
+        "expressionCount": 15,
+        "sentencePatternCount": 8,
+        "includeReadingQuiz": true,
+        "quizCount": 5,
+        "includeWritingPractice": true,
+        "practiceCount": 3,
+        "difficultyLevel": "intermediate"
+      }
+    },
+    {
+      "id": "2026-02-06-coming-home",
+      "title": "Coming Home - Digital Nomad Diaries Ep.7",
+      "date": "2026-02-06",
+      "type": "youtube",
+      "typeLabel": "YouTube 视频",
+      "file": "2026-02-06-coming-home.html",
+      "preview": "数字游民结束旅程回到家的故事，探讨归属感、安定下来、人生转变、苦乐参半的感受等主题。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
+      "wordCount": 20,
+      "expressionCount": 15,
+      "url": "https://www.youtube.com/watch?v=Ek-qoBqAg9A",
+      "timestamp": "2026-02-06T01:00:00",
+      "config": {
+        "wordCount": 20,
+        "expressionCount": 15,
+        "sentencePatternCount": 8,
+        "includeReadingQuiz": true,
+        "quizCount": 5,
+        "includeWritingPractice": true,
+        "practiceCount": 3,
+        "difficultyLevel": "intermediate"
+      }
+    },
+    {
+      "id": "2026-02-06-youtube-entrepreneurship",
+      "title": "YouTube创业：1年半涨粉百万，我做对的这件事",
+      "date": "2026-02-06",
+      "type": "youtube",
+      "typeLabel": "YouTube 视频",
+      "file": "2026-02-06-youtube-entrepreneurship.html",
+      "preview": "创作者大米Jojo分享在18个月内从零涨粉到100万订阅者的YouTube创业经验，核心信息是找到独特的内容定位、持续创造有价值的内容、与观众建立真实连接。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
+      "wordCount": 20,
+      "expressionCount": 15,
+      "url": "https://www.youtube.com/watch?v=qdgUqNjIAkA",
+      "timestamp": "2026-02-06T02:00:00",
+      "config": {
+        "wordCount": 20,
+        "expressionCount": 15,
+        "sentencePatternCount": 8,
+        "includeReadingQuiz": true,
+        "quizCount": 5,
+        "includeWritingPractice": true,
+        "practiceCount": 3,
+        "difficultyLevel": "intermediate"
+      }
+    }
+  ],
+  "byDate": {
+    "2026-02-06": {
+      "date": "2026-02-06",
+      "weekday": "星期五",
+      "count": 4,
+      "totalWords": 80,
+      "totalExpressions": 60,
+      "records": ["2026-02-06-month-alone-chiang-mai", "2026-02-06-shanghai-starting-over", "2026-02-06-coming-home", "2026-02-06-youtube-entrepreneurship"]
+    }
+  },
+  "defaultConfig": {
+    "wordCount": 20,
+    "expressionCount": 15,
+    "sentencePatternCount": 8,
+    "includeReadingQuiz": true,
+    "quizCount": 5,
+    "includeWritingPractice": true,
+    "practiceCount": 3,
+    "difficultyLevel": "intermediate",
+    "includePronunciation": true,
+    "includeContext": true,
+    "includeCollocations": true,
+    "focusAreas": ["vocabulary", "expressions", "grammar", "culture"]
+  },
+  "lastUpdated": "2026-02-06"
+}
