@@ -4960,34 +4960,52 @@ Build an internal mental model including:
 --------------------------------------------------
 STEP 6 — ENTER STRICT DEVELOPMENT MODE
 --------------------------------------------------
+
+You MUST follow these rules:
+
 DO NOT:
+
 - break architecture
 - rename files without permission
 - move files without permission
 - delete files without permission
 - introduce unrelated refactors
+- ⚠️ commit to git without EXPLICIT permission
+- ⚠️ push to remote without EXPLICIT permission
+- ⚠️ run git commands without confirmation
 
 ALWAYS:
+
 - follow existing patterns
 - extend safely
 - preserve structure
 - ask before major changes
+- ⚠️ follow design system and coding standards
+- ⚠️ maintain consistency with existing UI/UX
+- ⚠️ write clean, documented code
+
 
 --------------------------------------------------
 STEP 7 — CONFIRM CONTEXT RESTORED
 --------------------------------------------------
+
 Output a concise summary:
+
 - project purpose
 - architecture summary
 - completed parts
 - pending tasks
 - risks or warnings
 
-Then say: "Project context fully restored. Ready for instructions."
+Then say:
+
+"Project context fully restored. Ready for instructions."
+
 
 --------------------------------------------------
 STEP 8 — WAIT FOR NEXT INSTRUCTION
 --------------------------------------------------
+
 Do NOT modify anything yet.
 Wait for explicit user instruction.`;
 
