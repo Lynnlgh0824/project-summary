@@ -1,121 +1,42 @@
 {
-  "records": [
+  "version": "1.0",
+  "exportTime": "2026-02-27T"$(date +%H:%M:%S)",
+  "lastBackup": "2026-02-27T"$(date +%H:%M:%S),
+  "logs": [
     {
-      "id": "2026-02-06-month-alone-chiang-mai",
-      "title": "A Month Alone in Chiang Mai, Thailand",
-      "date": "2026-02-06",
-      "type": "youtube",
-      "typeLabel": "YouTube 视频",
-      "file": "2026-02-06-month-alone-chiang-mai.html",
-      "preview": "数字游民在清迈独自生活一个月的vlog，探讨心理健康、独自旅行、数字游民生活方式、工作生活平衡等核心主题。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
-      "wordCount": 20,
-      "expressionCount": 15,
-      "url": "https://www.youtube.com/watch?v=66MgD1FAZDA",
-      "timestamp": "2026-02-06T00:00:00",
-      "config": {
-        "wordCount": 20,
-        "expressionCount": 15,
-        "sentencePatternCount": 8,
-        "includeReadingQuiz": true,
-        "quizCount": 5,
-        "includeWritingPractice": true,
-        "practiceCount": 3,
-        "difficultyLevel": "intermediate"
-      }
-    },
-    {
-      "id": "2026-02-06-shanghai-starting-over",
-      "title": "I Moved to Shanghai - Starting Over in My 30s",
-      "date": "2026-02-06",
-      "type": "youtube",
-      "typeLabel": "YouTube 视频",
-      "file": "2026-02-06-shanghai-starting-over.html",
-      "preview": "创作者Evelyn在30多岁时搬到上海重新开始的故事，探讨不存在完美的城市、重新开始的勇气、建立归属感等主题。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
-      "wordCount": 20,
-      "expressionCount": 15,
-      "url": "https://www.youtube.com/watch?v=vQNVQIZySxU",
-      "timestamp": "2026-02-06T00:30:00",
-      "config": {
-        "wordCount": 20,
-        "expressionCount": 15,
-        "sentencePatternCount": 8,
-        "includeReadingQuiz": true,
-        "quizCount": 5,
-        "includeWritingPractice": true,
-        "practiceCount": 3,
-        "difficultyLevel": "intermediate"
-      }
-    },
-    {
-      "id": "2026-02-06-coming-home",
-      "title": "Coming Home - Digital Nomad Diaries Ep.7",
-      "date": "2026-02-06",
-      "type": "youtube",
-      "typeLabel": "YouTube 视频",
-      "file": "2026-02-06-coming-home.html",
-      "preview": "数字游民结束旅程回到家的故事，探讨归属感、安定下来、人生转变、苦乐参半的感受等主题。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
-      "wordCount": 20,
-      "expressionCount": 15,
-      "url": "https://www.youtube.com/watch?v=Ek-qoBqAg9A",
-      "timestamp": "2026-02-06T01:00:00",
-      "config": {
-        "wordCount": 20,
-        "expressionCount": 15,
-        "sentencePatternCount": 8,
-        "includeReadingQuiz": true,
-        "quizCount": 5,
-        "includeWritingPractice": true,
-        "practiceCount": 3,
-        "difficultyLevel": "intermediate"
-      }
-    },
-    {
-      "id": "2026-02-06-youtube-entrepreneurship",
-      "title": "YouTube创业：1年半涨粉百万，我做对的这件事",
-      "date": "2026-02-06",
-      "type": "youtube",
-      "typeLabel": "YouTube 视频",
-      "file": "2026-02-06-youtube-entrepreneurship.html",
-      "preview": "创作者大米Jojo分享在18个月内从零涨粉到100万订阅者的YouTube创业经验，核心信息是找到独特的内容定位、持续创造有价值的内容、与观众建立真实连接。包含20个核心词汇、15个地道表达、8个实用句型和完整练习题。",
-      "wordCount": 20,
-      "expressionCount": 15,
-      "url": "https://www.youtube.com/watch?v=qdgUqNjIAkA",
-      "timestamp": "2026-02-06T02:00:00",
-      "config": {
-        "wordCount": 20,
-        "expressionCount": 15,
-        "sentencePatternCount": 8,
-        "includeReadingQuiz": true,
-        "quizCount": 5,
-        "includeWritingPractice": true,
-        "practiceCount": 3,
-        "difficultyLevel": "intermediate"
-      }
+      "id": "$(date +%s)000",
+      "projectId": "project-organization",
+      "projectName": "项目管理汇总",
+      "date": "2026-02-27",
+      "datetime": "$(date +'%Y/%-m/%-d %H:%M:%S')",
+      "title": "🏗️ 多项目标准化体系构建",
+      "tags": [
+        {"name": "🏗️ 构建", "type": "feature"},
+        {"name": "📝 文档", "type": "documentation"},
+        {"name": "✅ 测试", "type": "testing"}
+      ],
+      "items": [
+        "✅ 创建7层能力要求模型 - 产品思维→结构设计→设计规范→技术实现→测试验收→发布迭代→AI协作",
+        "✅ 实施工作流程规范 - 理解→设计→确认→执行四步流程",
+        "✅ 统一5个项目文档结构 - PROJECT_RULES.md, PROJECT_CONTEXT.md, PROJECT_STRUCTURE.md, CHANGELOG.md",
+        "✅ 创建项目边界控制系统 - 所有CLAUDE.md添加严格的项目隔离规则",
+        "✅ 构建记忆系统架构 - 每个项目4个文件（project-memory.md, progress.md, decisions.md, mistakes.md）",
+        "✅ 标准化目录结构 - 统一tests/、docs/guides/、.gitignore、.env.example",
+        "✅ 创建自动化测试脚本 - 95项检查，100%通过率",
+        "✅ 修复Chiengmai项目缺失 - 补充memory/、tests/、docs/guides/、.gitignore、.env.example",
+        "✅ 分析项目启动脚本弹窗 - 研究\"选择项目\"、\"复制脚本\"功能实现",
+        "✅ 移除错误添加的置顶功能 - 修正需求理解偏差",
+        "✅ 代码量分析 - 项目日志系统5,601行代码（JavaScript 81.5%, CSS 15.9%, HTML 2.6%）"
+      ],
+      "code": "// 7层能力要求模型\n产品思维 (第1层)\n    ↓ 理解用户真实需求，分析业务价值\n\n结构设计能力 (第2层)\n    ↓ 设计清晰的目录结构，规划模块划分\n\n设计规范能力 (第3层)\n    ↓ 制定代码规范和命名约定\n\n技术实现理解 (第4层)\n    ↓ 选择合适的技术栈，理解技术限制\n\n测试与验收能力 (第5层)\n    ↓ 设计测试用例，定义验收标准\n\n发布与迭代管理能力 (第6层)\n    ↓ 规划发布流程，准备回滚方案\n\nAI协作表达能力 (第7层)\n    ↓ 清晰表达需求和方案，提供完整上下文"
     }
   ],
-  "byDate": {
-    "2026-02-06": {
-      "date": "2026-02-06",
-      "weekday": "星期五",
-      "count": 4,
-      "totalWords": 80,
-      "totalExpressions": 60,
-      "records": ["2026-02-06-month-alone-chiang-mai", "2026-02-06-shanghai-starting-over", "2026-02-06-coming-home", "2026-02-06-youtube-entrepreneurship"]
-    }
-  },
-  "defaultConfig": {
-    "wordCount": 20,
-    "expressionCount": 15,
-    "sentencePatternCount": 8,
-    "includeReadingQuiz": true,
-    "quizCount": 5,
-    "includeWritingPractice": true,
-    "practiceCount": 3,
-    "difficultyLevel": "intermediate",
-    "includePronunciation": true,
-    "includeContext": true,
-    "includeCollocations": true,
-    "focusAreas": ["vocabulary", "expressions", "grammar", "culture"]
-  },
-  "lastUpdated": "2026-02-06"
+  "projects": [
+    {"id": "project-organization", "name": "🗂️ 项目管理汇总", "startDate": "2026-02-06"},
+    {"id": "english-learning-tts", "name": "🎧 英语朗读学习", "startDate": "2026-02-05"},
+    {"id": "chiang-mai-activities", "name": "🏝️ 清迈活动平台", "startDate": "2026-01-19"},
+    {"id": "aisaas-video", "name": "🎥 AI SaaS 视频", "startDate": "2026-01-22"},
+    {"id": "clawdbot-railway", "name": "🤖 Clawdbot", "startDate": "2026-01-15"},
+    {"id": "skills-development", "name": "⚡ 技能开发与学习", "startDate": "2026-01-01"}
+  ]
 }

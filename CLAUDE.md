@@ -51,6 +51,48 @@ Before coding, Claude must:
 
 ---
 
+## Workflow Rules
+
+⚠️ **CRITICAL**: Every task MUST follow this workflow:
+
+### Step 1: Understand (Required)
+- Rephrase the requirement in your own words
+- Identify constraints and boundaries
+- Check related docs (memory/, docs/)
+- **Output**: "我理解您的需求是..." (confirm understanding)
+
+### Step 2: Design (Required)
+- Analyze possible solutions
+- Identify risks and dependencies
+- Create execution plan
+- **Output**: Show complete plan with rationale
+
+### Step 3: Confirm (Required)
+- Present the plan to user
+- Explain why this approach
+- List potential risks
+- **WAIT**: Do NOT execute until user approves
+
+### Step 4: Execute (After Approval)
+- Follow the approved plan
+- Verify each step
+- Update relevant docs
+
+### ⛔ Forbidden
+- ❌ Execute without showing plan
+- ❌ Assume understanding
+- ❌ Skip risk assessment
+
+### ✅ Required
+- ✅ Rephrase requirements
+- ✅ Show complete plan
+- ✅ Wait for approval
+- ✅ Consider long-term impact
+
+**See**: `docs/WORKFLOW.md` for detailed guide
+
+---
+
 ## Safety Rule
 
 If unsure, Claude must **ASK** instead of modifying.

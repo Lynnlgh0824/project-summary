@@ -1300,6 +1300,51 @@
 
             const historyLogs = [];
 
+            // 2月27日：项目标准化与工作流程实施
+            historyLogs.push({
+                id: Date.now().toString(),
+                projectId: 'project-organization',
+                projectName: '项目组织与管理',
+                date: '2026-02-27',
+                datetime: new Date().toLocaleString('zh-CN'),
+                title: '🏗️ 多项目标准化体系构建',
+                tags: [{ name: '🏗️ 构建', type: 'feature' }, { name: '📝 文档', type: 'documentation' }, { name: '✅ 测试', type: 'testing' }],
+                items: [
+                    '✅ 创建7层能力要求模型 - 产品思维→结构设计→设计规范→技术实现→测试验收→发布迭代→AI协作',
+                    '✅ 实施工作流程规范 - 理解→设计→确认→执行四步流程',
+                    '✅ 统一5个项目文档结构 - PROJECT_RULES.md, PROJECT_CONTEXT.md, PROJECT_STRUCTURE.md, CHANGELOG.md',
+                    '✅ 创建项目边界控制系统 - 所有CLAUDE.md添加严格的项目隔离规则',
+                    '✅ 构建记忆系统架构 - 每个项目4个文件（project-memory.md, progress.md, decisions.md, mistakes.md）',
+                    '✅ 标准化目录结构 - 统一tests/、docs/guides/、.gitignore、.env.example',
+                    '✅ 创建自动化测试脚本 - 95项检查，100%通过率',
+                    '✅ 修复Chiengmai项目缺失 - 补充memory/、tests/、docs/guides/、.gitignore、.env.example',
+                    '✅ 分析项目启动脚本弹窗 - 研究"选择项目"、"复制脚本"功能实现',
+                    '✅ 移除错误添加的置顶功能 - 修正需求理解偏差',
+                    '✅ 代码量分析 - 项目日志系统5,601行代码（JavaScript 81.5%, CSS 15.9%, HTML 2.6%）'
+                ],
+                code: `// 7层能力要求模型
+产品思维 (第1层)
+    ↓ 理解用户真实需求，分析业务价值
+
+结构设计能力 (第2层)
+    ↓ 设计清晰的目录结构，规划模块划分
+
+设计规范能力 (第3层)
+    ↓ 制定代码规范和命名约定
+
+技术实现理解 (第4层)
+    ↓ 选择合适的技术栈，理解技术限制
+
+测试与验收能力 (第5层)
+    ↓ 设计测试用例，定义验收标准
+
+发布与迭代管理能力 (第6层)
+    ↓ 规划发布流程，准备回滚方案
+
+AI协作表达能力 (第7层)
+    ↓ 清晰表达需求和方案，提供完整上下文`
+            });
+
             // 2月6日：项目组织与管理
             historyLogs.push({
                 id: Date.now().toString(),
@@ -1326,6 +1371,10 @@ async function autoSaveToFile(logs) {
         await writable.write(JSON.stringify(data, null, 2));
         await writable.close();
         showSaveNotification();
+
+        // 更新备份时间
+        updateBackupTime();
+
         return;
     }
     setTimeout(async () => {
@@ -2482,6 +2531,46 @@ async function autoSaveToFile(logs) {
             return generatedCount;
         }
 
+        // ============ 备份提醒功能 ============
+        // 检查备份状态
+        function checkBackupStatus() {
+            const lastBackup = localStorage.getItem('last_backup_date');
+            const daysSinceBackup = lastBackup
+                ? Math.floor((Date.now() - parseInt(lastBackup)) / (1000 * 60 * 60 * 24))
+                : 999;
+
+            if (daysSinceBackup >= 7) {
+                // 延迟 3 秒显示提醒，避免与欢迎引导冲突
+                setTimeout(() => {
+                    showBackupReminder(daysSinceBackup);
+                }, 3000);
+            }
+        }
+
+        // 显示备份提醒
+        function showBackupReminder(days) {
+            const message = days === 999
+                ? '📊 项目日志系统提醒\n\n您还没有备份过数据！\n\n建议立即导出备份到安全位置。'
+                : `📊 项目日志系统提醒\n\n距离上次备份已过 ${days} 天。\n\n建议导出最新备份到安全位置。`;
+
+            if (confirm(message + '\n\n是否立即导出备份？')) {
+                // 触发导出功能
+                const exportBtn = document.querySelector('.btn[onclick*="exportBackup"], .btn:contains("导出")');
+                if (exportBtn) {
+                    exportBtn.click();
+                } else {
+                    // 如果找不到导出按钮，显示手动导出说明
+                    alert('请点击页面上的"导出备份"按钮来保存数据。\n\n建议保存到多个位置：\n- Documents 文件夹\n- 云盘（iCloud/Google Drive）\n- U盘或外部硬盘');
+                }
+            }
+        }
+
+        // 更新备份时间
+        function updateBackupTime() {
+            localStorage.setItem('last_backup_date', Date.now().toString());
+            console.log('✅ 备份时间已更新');
+        }
+
         // 初始化
         window.addEventListener('DOMContentLoaded', () => {
             initProjects();
@@ -2497,6 +2586,9 @@ async function autoSaveToFile(logs) {
             updateProjectSelector();
 
             renderAll();
+
+            // 检查备份状态（延迟检查）
+            checkBackupStatus();
 
             // 渲染待办清单（默认tab）
             renderTodosContent();
@@ -2558,6 +2650,10 @@ async function autoSaveToFile(logs) {
                     await writable.write(JSON.stringify(data, null, 2));
                     await writable.close();
                     console.log('✅ 数据已自动保存到本地文件');
+
+                    // 更新备份时间
+                    updateBackupTime();
+
                     // 在页面显示保存成功提示
                     showSaveNotification();
                     return;
@@ -2612,6 +2708,9 @@ async function autoSaveToFile(logs) {
                     await writable.write(JSON.stringify(data, null, 2));
                     await writable.close();
                     console.log('✅ 数据已保存，后续将自动更新此文件');
+
+                    // 更新备份时间
+                    updateBackupTime();
                 } catch (err) {
                     // 用户取消了选择文件，这是正常的
                     if (err.name !== 'AbortError') {
