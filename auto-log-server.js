@@ -14,6 +14,7 @@ const PORT = 3003;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use(express.static(__dirname));
 
 // 项目配置
 const PROJECTS = {
