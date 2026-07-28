@@ -2,7 +2,7 @@
 
 > **项目**: Project Summary
 > **版本**: v1.0.0
-> **最后更新**: 2026-02-25
+> **最后更新**: 2026-05-07
 
 ---
 
@@ -64,6 +64,27 @@
 ---
 
 ## 🔄 功能更新记录
+
+### 2026-05-07（5月大迭代 · 时间统计模块）
+
+#### ✨ 新增
+- **时间统计模块（Time Statistics）**
+  - `auto_extract_session.js`：从 Hermes session 文件按小时提取任务时间段，支持 `--all` 批量落盘到 `diary-data.json` 每条日记的 `timeStats` 字段
+  - `generate_inferred_timestats.js`：为 2026-05-03 之前的 85 天日记基于全文推断 `timeStats`，标注 `inferred:true`
+  - 服务端 `/api/timestats` 端点：`auto-log-server.js` 读取 `diary-data.json` 按日期聚合时间统计
+  - 首页「⏱ 时间统计」视图：异常面板 + 时间条目列表（时段色标 + 推断标记），含三段校验（首条/末条睡眠窗口、时间重叠、>120min 大间隙）
+
+#### 📚 文档
+- `timeStats-module-20260507.md`：时间统计模块设计说明与实现记录
+- `docs/guides/time-statistics-module.md`：模块函数体复用参考
+
+#### 🔧 改进
+- `diary-data.json` 纳入 git 跟踪，覆盖 2026-01-01 → 2026-07-28 共 165 天（80 天真实 session + 85 天推断）
+- 首页 `index.html` 与 `项目日志系统-首页.html` 同步时间统计视图
+
+#### 🐛 修复
+- 修复 `/api/logs` 的 `slice(-500)` 截断导致 287 条日志丢失（现返回完整 787 条）
+- 修复 `welcomeGuide` 元素缺失导致的首页初始化中断
 
 ### 2026-02-25
 
@@ -280,5 +301,5 @@
 ---
 
 **文档版本**: v1.0.0
-**最后更新**: 2026-02-25
+**最后更新**: 2026-05-07
 **维护者**: Project Team
