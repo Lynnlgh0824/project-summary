@@ -1,8 +1,1037 @@
 {
   "version": "2.1",
-  "exportTime": "2026-05-06T16:12:05.450Z",
+  "exportTime": "2026-07-28T17:25:57.963Z",
   "lastBackup": "2026-05-06T16:12:05.450Z",
   "logs": [
+    {
+      "id": "20260729-project-summary-manual",
+      "projectId": "project-summary",
+      "projectName": "项目组织与管理",
+      "date": "2026-07-29",
+      "datetime": "2026-07-29 00:00:00",
+      "title": "🚀 优化 - 项目组织与管理（首页合并与生成规则修复）",
+      "tags": [
+        {
+          "name": "🚀 优化",
+          "type": "improvement"
+        }
+      ],
+      "items": [
+        "✅ 以原版 项目日志系统.html 为基底，合并 project-log.html 增量（拖拽排序/备份导出导入/用时分析/数据统计标签页）",
+        "✅ 命名首页为 项目日志系统-首页.html 并设为 / 首页，标题加「首页」标识",
+        "✅ 侧边栏新增「🧰 工具快捷方式」板块（待办恢复/新版日志/概览/API健康）",
+        "✅ 修复 auto-daily-log.sh 路径（project summary→project-summary）与 Chiengmai 拼写",
+        "✅ 修复 auto-log-server.js 按天补录的日期窗口 bug（基于请求日而非当前日）",
+        "✅ 启动 5-15→7-29 缺失日志按天自动补录任务"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260728-project-summary-manual",
+      "projectId": "project-summary",
+      "projectName": "项目组织与管理",
+      "date": "2026-07-28",
+      "datetime": "2026-07-28 00:00:00",
+      "title": "✨ 新功能 - 项目组织与管理（合并 worktree 与日志系统重构）",
+      "tags": [
+        {
+          "name": "✨ 新功能",
+          "type": "feature"
+        }
+      ],
+      "items": [
+        "✅ 合并 project-summary.worktrees/agents-current-features-issues 到主项目（经对比为冗余副本，0 独有文件）",
+        "✅ 清理 git worktree 与无独有提交的分支，项目整合为单一 main",
+        "✅ 自测全部功能：/api/health、/api/project-status、/api/auto-generate-log 均正常",
+        "✅ 创建可访问首页 index.html（聚合功能入口 + 实时 API 状态）",
+        "🔧 修复 auto-log-server.js 中 Chiengmai 路径拼写（真实目录为 Chiangmai）"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260602-chiangmai",
+      "projectId": "chiangmai",
+      "projectName": "Chiangmai",
+      "date": "2026-06-02",
+      "datetime": "2026-06-02 00:00:00",
+      "title": "🔧 修复 - Chiangmai",
+      "tags": [
+        {
+          "name": "🔧 修复",
+          "type": "fix"
+        }
+      ],
+      "items": [
+        "✅ fix: unify status fields to Chinese and optimize mobile UI (2dcb6ba · Lynn)",
+        "✅ chore: remove obsolete scripts and data backups (fe0eb21 · Lynn)",
+        "✅ feat: add E2E test suite and mobile documentation (9289c87 · Lynn)",
+        "✅ feat: extract admin UI into separate CSS and JS files (dac8369 · Lynn)",
+        "✅ feat: add v3 user flow prototype and archive old scripts (16c6f7e · Lynn)",
+        "✅ feat: add modular server structure (f000d7a · Lynn)",
+        "✅ feat: add WeChat miniprogram skeleton (7b3e6b3 · Lynn)",
+        "✅ chore: gitignore temporary test scripts and audit artifacts (3c0bf13 · Lynn)",
+        "✅ fix: update UX walkthrough spec and remove stale test artifact (e969c2e · Lynn)"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260601-english-learning",
+      "projectId": "english-learning",
+      "projectName": "英语学习TTS系统",
+      "date": "2026-06-01",
+      "datetime": "2026-06-01 00:00:00",
+      "title": "📚 文档 - 英语学习TTS系统",
+      "tags": [
+        {
+          "name": "📚 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "✅ docs: add development standards and design system documentation (10fc443 · Lynn)"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260601-chiangmai",
+      "projectId": "chiangmai",
+      "projectName": "Chiangmai",
+      "date": "2026-06-01",
+      "datetime": "2026-06-01 00:00:00",
+      "title": "🔧 修复 - Chiangmai",
+      "tags": [
+        {
+          "name": "🔧 修复",
+          "type": "fix"
+        }
+      ],
+      "items": [
+        "✅ fix: mobile UI optimization for search components (b5b3036 · Lynn)",
+        "✅ docs: add mobile UI preview files and test scripts (58e05ce · Lynn)",
+        "✅ docs: add homepage optimization prototype (c2fdf3c · Lynn)",
+        "✅ fix: revert viewport scaling and update search button style (e3580de · Lynn)"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260601-aisaasvideo",
+      "projectId": "aisaasvideo",
+      "projectName": "AI SaaS视频项目",
+      "date": "2026-06-01",
+      "datetime": "2026-06-01 00:00:00",
+      "title": "📚 文档 - AI SaaS视频项目",
+      "tags": [
+        {
+          "name": "📚 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "✅ docs: add project documentation and development guidelines (bcecb98 · Lynn)"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260601-clawdbot-railway-template",
+      "projectId": "clawdbot-railway-template",
+      "projectName": "Clawdbot Railway模板",
+      "date": "2026-06-01",
+      "datetime": "2026-06-01 00:00:00",
+      "title": "📚 文档 - Clawdbot Railway模板",
+      "tags": [
+        {
+          "name": "📚 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "✅ docs: add project documentation and design analysis (f55ae96 · Lynn)"
+      ],
+      "code": null
+    },
+    {
+      "id": "diary-2026-05-14-1",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-14",
+      "datetime": "2026/5/14 10:00:00",
+      "title": "5月数据修复 - 补录日志",
+      "tags": [
+        {
+          "name": "🔧 修复",
+          "type": "fix"
+        }
+      ],
+      "items": [
+        "从 Obsidian 日记提取5月数据",
+        "合并到 data.json"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-13-1",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 09:00:00",
+      "title": "设计简化版日报规则（7模块）",
+      "tags": [
+        {
+          "name": "💡 设计",
+          "type": "design"
+        }
+      ],
+      "items": [
+        "摘要/统计/关键词/活跃成员/话题聚类/高光时刻/群画像"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-13-2",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 10:00:00",
+      "title": "创建 gen_digest_text.py",
+      "tags": [
+        {
+          "name": "✨ 新功能",
+          "type": "feature"
+        }
+      ],
+      "items": [
+        "文字日报生成器"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-13-3",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 11:00:00",
+      "title": "修改推送脚本",
+      "tags": [
+        {
+          "name": "🔧 修改",
+          "type": "modify"
+        }
+      ],
+      "items": [
+        "daily_digest_image_push.sh → text"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-13-4",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 12:00:00",
+      "title": "飞书推送测试",
+      "tags": [
+        {
+          "name": "🧪 测试",
+          "type": "test"
+        }
+      ],
+      "items": [
+        "推送成功"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-13-5",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 13:00:00",
+      "title": "群聊实时总结能力测试",
+      "tags": [
+        {
+          "name": "🧪 测试",
+          "type": "test"
+        }
+      ],
+      "items": [
+        "电商暴富村 20条",
+        "大玩儿区 500+条",
+        "2⃣️6⃣️Nothing💡 180+条"
+      ],
+      "code": null,
+      "duration": 45,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-13-6",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 14:00:00",
+      "title": "feat(wx-insights): add simplified text digest generation",
+      "tags": [
+        {
+          "name": "✨ 新功能",
+          "type": "feature"
+        }
+      ],
+      "items": [
+        "Git commit"
+      ],
+      "code": null,
+      "duration": 5,
+      "source": "git"
+    },
+    {
+      "id": "diary-2026-05-13-7",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 15:00:00",
+      "title": "docs: 添加 TROUBLESHOOTING 和时间统计模块指南",
+      "tags": [
+        {
+          "name": "📝 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "Git commit"
+      ],
+      "code": null,
+      "duration": 5,
+      "source": "git"
+    },
+    {
+      "id": "diary-2026-05-13-8",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-13",
+      "datetime": "2026/5/13 15:01:00",
+      "title": "feat: 更新 project-log.html 视图系统",
+      "tags": [
+        {
+          "name": "✨ 新功能",
+          "type": "feature"
+        }
+      ],
+      "items": [
+        "Git commit"
+      ],
+      "code": null,
+      "duration": 5,
+      "source": "git"
+    },
+    {
+      "id": "diary-2026-05-12-1",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-12",
+      "datetime": "2026/5/12 09:00:00",
+      "title": "API 404 问题排查",
+      "tags": [
+        {
+          "name": "🔧 排查",
+          "type": "debug"
+        }
+      ],
+      "items": [
+        "双端口架构导致",
+        "页面运行在 8090，API 运行在 3003"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-12-2",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-12",
+      "datetime": "2026/5/12 10:00:00",
+      "title": "auto-log-server 启动与端口统一",
+      "tags": [
+        {
+          "name": "⚙️ 配置",
+          "type": "config"
+        }
+      ],
+      "items": [
+        "安装 express/cors",
+        "统一到 3003 端口"
+      ],
+      "code": null,
+      "duration": 35,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-12-3",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-12",
+      "datetime": "2026/5/12 11:00:00",
+      "title": "project-log.html 视图系统更新",
+      "tags": [
+        {
+          "name": "🎨 优化",
+          "type": "improve"
+        }
+      ],
+      "items": [
+        "双维度视图",
+        "数据校验模块"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-12-4",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-12",
+      "datetime": "2026/5/12 13:00:00",
+      "title": "媒体识别模块优化",
+      "tags": [
+        {
+          "name": "⚡ 优化",
+          "type": "optimize"
+        }
+      ],
+      "items": [
+        "B类触发词规则优化",
+        "C类泛推荐规则放宽",
+        "联网验证前置"
+      ],
+      "code": null,
+      "duration": 110,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-12-5",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-12",
+      "datetime": "2026/5/12 15:00:00",
+      "title": "写入 TROUBLESHOOTING.md",
+      "tags": [
+        {
+          "name": "📝 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "踩坑文档记录"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-11-1",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 环境检查",
+      "date": "2026-05-11",
+      "datetime": "2026/5/11 10:00:00",
+      "title": "环境组件检查",
+      "tags": [
+        {
+          "name": "🔍 检查",
+          "type": "check"
+        }
+      ],
+      "items": [
+        "Hermes Gateway 运行中 PID 1060",
+        "飞书平台已连接",
+        "微信平台 DNS 问题"
+      ],
+      "code": null,
+      "duration": 25,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-11-2",
+      "projectId": "wx-insights",
+      "projectName": "wx-insights",
+      "date": "2026-05-11",
+      "datetime": "2026/5/11 10:30:00",
+      "title": "wx-cli 安装与配置",
+      "tags": [
+        {
+          "name": "⚙️ 配置",
+          "type": "config"
+        }
+      ],
+      "items": [
+        "v0.1.10 安装完成",
+        "数据库密钥 all_keys.json 为空"
+      ],
+      "code": null,
+      "duration": 45,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-11-3",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-11",
+      "datetime": "2026/5/11 14:00:00",
+      "title": "公众号文章检查",
+      "tags": [
+        {
+          "name": "🔍 检查",
+          "type": "check"
+        }
+      ],
+      "items": [
+        "SimpRead 安装进度检查",
+        "微信公众号文章抓取待配置"
+      ],
+      "code": null,
+      "duration": 25,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-09-1",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 定时任务",
+      "date": "2026-05-09",
+      "datetime": "2026/5/9 09:00:00",
+      "title": "暂停微信cron任务（续）",
+      "tags": [
+        {
+          "name": "⚙️ 配置",
+          "type": "config"
+        }
+      ],
+      "items": [
+        "避免限流继续堆积"
+      ],
+      "code": null,
+      "duration": 15,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-09-2",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 问题排查",
+      "date": "2026-05-09",
+      "datetime": "2026/5/9 09:30:00",
+      "title": "排查Gateway重启",
+      "tags": [
+        {
+          "name": "🔧 排查",
+          "type": "debug"
+        }
+      ],
+      "items": [
+        "原因待查明"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-08-1",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 问题排查",
+      "date": "2026-05-08",
+      "datetime": "2026/5/8 09:00:00",
+      "title": "飞书主频道未设置排查",
+      "tags": [
+        {
+          "name": "🔧 排查",
+          "type": "debug"
+        }
+      ],
+      "items": [
+        "提示用户需在飞书发送消息"
+      ],
+      "code": null,
+      "duration": 15,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-08-2",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 问题排查",
+      "date": "2026-05-08",
+      "datetime": "2026/5/8 09:30:00",
+      "title": "微信接口限流排查",
+      "tags": [
+        {
+          "name": "🔧 排查",
+          "type": "debug"
+        }
+      ],
+      "items": [
+        "rate limited (-2)",
+        "等待恢复"
+      ],
+      "code": null,
+      "duration": 20,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-08-3",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 问题排查",
+      "date": "2026-05-08",
+      "datetime": "2026/5/8 10:00:00",
+      "title": "Gateway重启堆积排查",
+      "tags": [
+        {
+          "name": "🔧 排查",
+          "type": "debug"
+        }
+      ],
+      "items": [
+        "发现 shutdown 通知重复发送"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-08-4",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 定时任务",
+      "date": "2026-05-08",
+      "datetime": "2026/5/8 11:00:00",
+      "title": "暂停微信cron任务",
+      "tags": [
+        {
+          "name": "⚙️ 配置",
+          "type": "config"
+        }
+      ],
+      "items": [
+        "避免限流继续堆积"
+      ],
+      "code": null,
+      "duration": 10,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-08-5",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 定时任务",
+      "date": "2026-05-08",
+      "datetime": "2026/5/8 11:30:00",
+      "title": "定时任务状态梳理",
+      "tags": [
+        {
+          "name": "📋 整理",
+          "type": "organize"
+        }
+      ],
+      "items": [
+        "识别出8个微信cron任务"
+      ],
+      "code": null,
+      "duration": 20,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-1",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 09:00:00",
+      "title": "时间校验系统设计与实现",
+      "tags": [
+        {
+          "name": "✨ 新功能",
+          "type": "feature"
+        }
+      ],
+      "items": [
+        "设计时间校验系统",
+        "09:00-10:00"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-2",
+      "projectId": "project-summary",
+      "projectName": "project-summary",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 10:00:00",
+      "title": "分析5月数据问题",
+      "tags": [
+        {
+          "name": "🔍 分析",
+          "type": "analyze"
+        }
+      ],
+      "items": [
+        "发现 timeStats 错误偏移 +10h",
+        "project-log.html 视图优化"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-3",
+      "projectId": "skills",
+      "projectName": "Skills 开发",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 10:00:00",
+      "title": "时间戳校验规则 SKILL.md",
+      "tags": [
+        {
+          "name": "📝 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "创建 ~/.hermes/skills/时间管理/时间戳校验规则/SKILL.md"
+      ],
+      "code": null,
+      "duration": 45,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-4",
+      "projectId": "skills",
+      "projectName": "Skills 开发",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 11:00:00",
+      "title": "session-record SKILL.md",
+      "tags": [
+        {
+          "name": "📝 文档",
+          "type": "docs"
+        }
+      ],
+      "items": [
+        "创建 ~/.hermes/skills/productivity/session-record/SKILL.md"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-5",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 14:00:00",
+      "title": "天涯智囊团启动",
+      "tags": [
+        {
+          "name": "💬 讨论",
+          "type": "discuss"
+        }
+      ],
+      "items": [
+        "职业方向探索"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-6",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 15:00:00",
+      "title": "AI PM 具体怎么做",
+      "tags": [
+        {
+          "name": "💬 讨论",
+          "type": "discuss"
+        }
+      ],
+      "items": [
+        "方法论讨论"
+      ],
+      "code": null,
+      "duration": 45,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-07-7",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-07",
+      "datetime": "2026/5/7 16:00:00",
+      "title": "简历优化方向",
+      "tags": [
+        {
+          "name": "💼 职业",
+          "type": "career"
+        }
+      ],
+      "items": [
+        "框架设计"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-06-1",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 配置",
+      "date": "2026-05-06",
+      "datetime": "2026/5/6 09:00:00",
+      "title": "配置飞书/微信 Hermes Agent 连接",
+      "tags": [
+        {
+          "name": "⚙️ 配置",
+          "type": "config"
+        }
+      ],
+      "items": [
+        "完成飞书/微信消息通道接入",
+        "配置产品大神 Hermes Agent"
+      ],
+      "code": null,
+      "duration": 45,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-06-2",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 模型配置",
+      "date": "2026-05-06",
+      "datetime": "2026/5/6 10:00:00",
+      "title": "调试 MiniMax 和 MiMo 模型自动切换",
+      "tags": [
+        {
+          "name": "🔧 调试",
+          "type": "debug"
+        }
+      ],
+      "items": [
+        "实现 MiniMax + MiMo fallback 机制",
+        "WebSearch 失败时自动切换到 MiMo"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-06-3",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 会话记忆",
+      "date": "2026-05-06",
+      "datetime": "2026/5/6 11:00:00",
+      "title": "配置会话记忆自动保存到 Obsidian",
+      "tags": [
+        {
+          "name": "⚙️ 配置",
+          "type": "config"
+        }
+      ],
+      "items": [
+        "每日会话记录规则更新",
+        "Session_Daily_YYYY-MM-DD.md 文件格式"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-06-4",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes Git 提交",
+      "date": "2026-05-06",
+      "datetime": "2026/5/6 12:00:00",
+      "title": "fix(gateway): wait for systemd restart readiness",
+      "tags": [
+        {
+          "name": "🐛 Bug修复",
+          "type": "fix"
+        }
+      ],
+      "items": [
+        "hermes-agent 提交"
+      ],
+      "code": null,
+      "duration": 5,
+      "source": "git"
+    },
+    {
+      "id": "diary-2026-05-06-5",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes Git 提交",
+      "date": "2026-05-06",
+      "datetime": "2026/5/6 12:01:00",
+      "title": "fix(gateway): narrow rate-limit catch and move sync state",
+      "tags": [
+        {
+          "name": "🐛 Bug修复",
+          "type": "fix"
+        }
+      ],
+      "items": [
+        "hermes-agent 提交"
+      ],
+      "code": null,
+      "duration": 5,
+      "source": "git"
+    },
+    {
+      "id": "diary-2026-05-06-6",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes Git 提交",
+      "date": "2026-05-06",
+      "datetime": "2026/5/6 12:02:00",
+      "title": "fix(tui): restore voice push-to-talk parity",
+      "tags": [
+        {
+          "name": "🐛 Bug修复",
+          "type": "fix"
+        }
+      ],
+      "items": [
+        "hermes-agent 提交"
+      ],
+      "code": null,
+      "duration": 5,
+      "source": "git"
+    },
+    {
+      "id": "diary-2026-05-05-1",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 定时任务系统",
+      "date": "2026-05-05",
+      "datetime": "2026/5/5 09:00:00",
+      "title": "Hermes 定时任务补发机制讨论",
+      "tags": [
+        {
+          "name": "💬 讨论",
+          "type": "discuss"
+        }
+      ],
+      "items": [
+        "补发机制讨论 30min",
+        "日历设置 15min",
+        "终端消息过滤 20min"
+      ],
+      "code": null,
+      "duration": 65,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-05-2",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-05",
+      "datetime": "2026/5/5 10:00:00",
+      "title": "完成 女權主義 音频转写",
+      "tags": [
+        {
+          "name": "✅ 完成",
+          "type": "done"
+        }
+      ],
+      "items": [
+        "转写 107分钟",
+        "100%覆盖"
+      ],
+      "code": null,
+      "duration": 60,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-05-3",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-05",
+      "datetime": "2026/5/5 11:00:00",
+      "title": "完成 疯狂星期四2 音频转写",
+      "tags": [
+        {
+          "name": "✅ 完成",
+          "type": "done"
+        }
+      ],
+      "items": [
+        "转写 149分钟"
+      ],
+      "code": null,
+      "duration": 75,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-05-4",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-05",
+      "datetime": "2026/5/5 12:00:00",
+      "title": "完成 小水 音频转写",
+      "tags": [
+        {
+          "name": "✅ 完成",
+          "type": "done"
+        }
+      ],
+      "items": [
+        "转写 141分钟"
+      ],
+      "code": null,
+      "duration": 70,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-05-5",
+      "projectId": "personal-diary",
+      "projectName": "个人日记",
+      "date": "2026-05-05",
+      "datetime": "2026/5/5 13:00:00",
+      "title": "完成 3个 Get笔记 写入 Obsidian",
+      "tags": [
+        {
+          "name": "✅ 完成",
+          "type": "done"
+        }
+      ],
+      "items": [
+        "女權主義 Get笔记",
+        "疯狂星期四2 Get笔记",
+        "小水 Get笔记"
+      ],
+      "code": null,
+      "duration": 45,
+      "source": "diary"
+    },
+    {
+      "id": "diary-2026-05-05-6",
+      "projectId": "hermes-agent",
+      "projectName": "Hermes 配置",
+      "date": "2026-05-05",
+      "datetime": "2026/5/5 14:00:00",
+      "title": "健康评估与生活建议报告",
+      "tags": [
+        {
+          "name": "📝 报告",
+          "type": "report"
+        }
+      ],
+      "items": [
+        "完成个人健康评估报告"
+      ],
+      "code": null,
+      "duration": 30,
+      "source": "diary"
+    },
     {
       "id": "diary-2026-05-04-1",
       "projectId": "personal-diary",

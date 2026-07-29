@@ -12657,5 +12657,23 @@
       }
     ],
     "timeStatsSource": "session"
+  },
+  {
+    "date": "2026-07-29",
+    "source": "session",
+    "day": "",
+    "week": "",
+    "todos": [],
+    "logSummary": [],
+    "fullContent": "",
+    "timeStats": [
+      {
+        "start": "09:00",
+        "end": "10:00",
+        "period": "早上",
+        "task": "会话工作（仅心跳）"
+      }
+    ],
+    "timeStatsSource": "session"
   }
 ]
