@@ -4447,11 +4447,89 @@ async function autoSaveToFile(logs) {
                     return;
                 }
                 let totalEntries = 0, inferredDays = 0;
+                let totalSleepEntries = 0, sleepDaysCount = 0;
                 dates.forEach(d => {
                     const arr = byDate[d] || [];
                     totalEntries += arr.length;
                     if (arr.some(s => s.inferred)) inferredDays++;
+                    const se = arr.filter(s => s && (isInSleepWindow(s.start) || isInSleepWindow(s.end))).length;
+                    totalSleepEntries += se;
+                    if (se > 0) sleepDaysCount++;
                 });
+
+                // ---- 月度聚合 & 覆盖率 & 空白档期 & 睡眠时段分析 ----
+                const monthMap = {};
+                dates.forEach(d => {
+                    const m = d.slice(0, 7);
+                    const arr = byDate[d] || [];
+                    if (!monthMap[m]) monthMap[m] = { days: 0, entries: 0, inferredDays: 0 };
+                    monthMap[m].days++;
+                    monthMap[m].entries += arr.length;
+                    if (arr.some(s => s.inferred)) monthMap[m].inferredDays++;
+                });
+                const months = Object.keys(monthMap).sort();
+                const sortedAsc = dates.slice().sort();
+                const minD = new Date(sortedAsc[0] + 'T00:00:00');
+                const maxD = new Date(sortedAsc[sortedAsc.length - 1] + 'T00:00:00');
+                const spanDays = Math.max(1, Math.round((maxD - minD) / 86400000) + 1);
+                const coveragePct = Math.round(dates.length / spanDays * 100);
+                const gaps = [];
+                for (let i = 0; i < sortedAsc.length - 1; i++) {
+                    const a = new Date(sortedAsc[i] + 'T00:00:00');
+                    const b = new Date(sortedAsc[i + 1] + 'T00:00:00');
+                    const gap = Math.round((b - a) / 86400000) - 1;
+                    if (gap > 0) gaps.push({ from: sortedAsc[i], to: sortedAsc[i + 1], days: gap });
+                }
+                let aggHtml = '<div style="background:#fafafa;border:1px solid #eee;border-radius:10px;padding:14px 16px;margin-bottom:18px;">';
+                aggHtml += '<div style="font-weight:600;color:#333;margin-bottom:10px;">📊 月度聚合 &amp; 覆盖率（共 ' + dates.length + ' 天 / 跨度 ' + spanDays + ' 天 / 整体覆盖 ' + coveragePct + '%）</div>';
+                aggHtml += '<div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#666;margin-bottom:8px;">';
+                aggHtml += '<span>🌙 睡眠时段条目：' + totalSleepEntries + ' 条（' + sleepDaysCount + ' 天含睡眠时段记录）</span>';
+                aggHtml += '<span>🕳 空白档期：' + (gaps.length ? gaps.length + ' 段' : '无') + '</span>';
+                aggHtml += '</div>';
+                aggHtml += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+                aggHtml += '<thead><tr style="color:#888;text-align:left;"><th style="padding:4px 8px;">月份</th><th>有数据天</th><th>条目</th><th>推断天</th><th>覆盖率</th><th style="width:32%;">月度覆盖条</th></tr></thead><tbody>';
+                months.forEach(m => {
+                    const mm = monthMap[m];
+                    const parts = m.split('-');
+                    const y = Number(parts[0]), mo = Number(parts[1]);
+                    const totalDaysMonth = new Date(y, mo, 0).getDate();
+                    const cov = Math.round(mm.days / totalDaysMonth * 100);
+                    aggHtml += '<tr style="border-top:1px solid #eee;">' +
+                        '<td style="padding:4px 8px;font-weight:600;">' + m + '</td>' +
+                        '<td>' + mm.days + '</td><td>' + mm.entries + '</td><td>' + mm.inferredDays + '</td>' +
+                        '<td>' + cov + '%</td>' +
+                        '<td><div style="background:#eee;border-radius:4px;height:8px;width:100%;"><div style="background:#4caf50;height:8px;border-radius:4px;width:' + cov + '%;"></div></div></td>' +
+                        '</tr>';
+                });
+                aggHtml += '</tbody></table>';
+                if (gaps.length) {
+                    aggHtml += '<div style="margin-top:10px;font-size:12px;color:#e65100;">🕳 空白档期（连续无数据）：' + gaps.map(g => escapeHtml(g.from + '→' + g.to + ' (' + g.days + '天)')).join('；') + '</div>';
+                }
+                // 时段分布饼图（早上/下午/晚上）
+                const periodCount = { '早上': 0, '下午': 0, '晚上': 0 };
+                Object.keys(byDate).forEach(d => (byDate[d] || []).forEach(s => {
+                    if (periodCount.hasOwnProperty(s.period)) periodCount[s.period]++;
+                }));
+                const pieTotal = periodCount['早上'] + periodCount['下午'] + periodCount['晚上'];
+                let pieAcc = 0; const pieSegs = [];
+                ['早上', '下午', '晚上'].forEach(p => {
+                    const c = periodCount[p]; if (!c) return;
+                    const pct = c / pieTotal * 100;
+                    const color = TIME_RULES.periodColors[p] || '#999';
+                    pieSegs.push(color + ' ' + pieAcc.toFixed(2) + '% ' + (pieAcc + pct).toFixed(2) + '%');
+                    pieAcc += pct;
+                });
+                const pieGrad = pieSegs.length ? 'conic-gradient(' + pieSegs.join(',') + ')' : '#eee';
+                aggHtml += '<div style="display:flex;gap:20px;align-items:center;margin-top:12px;flex-wrap:wrap;">';
+                aggHtml += '<div style="width:120px;height:120px;border-radius:50%;background:' + pieGrad + ';flex:none;box-shadow:0 1px 4px rgba(0,0,0,.1);"></div>';
+                aggHtml += '<div style="font-size:13px;color:#555;line-height:1.9;">';
+                ['早上', '下午', '晚上'].forEach(p => {
+                    const c = periodCount[p]; const pct = pieTotal ? Math.round(c / pieTotal * 100) : 0;
+                    const color = TIME_RULES.periodColors[p] || '#999';
+                    aggHtml += '<div><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + color + ';margin-right:6px;"></span>' + p + '：' + c + ' 条（' + pct + '%）</div>';
+                });
+                aggHtml += '</div></div>';
+                aggHtml += '</div>';
 
                 const wrap = document.createElement('div');
                 wrap.style.padding = '20px 24px';
@@ -4461,6 +4539,7 @@ async function autoSaveToFile(logs) {
                         card(totalEntries, '时间条目') +
                         card(inferredDays, '推断天数') +
                     '</div>' +
+                    aggHtml +
                     '<div style="margin-bottom:16px;">' +
                         '<label style="font-size:13px;color:#666;margin-right:8px;">选择日期：</label>' +
                         '<select id="tsDateSel" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;min-width:160px;">' +
