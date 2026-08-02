@@ -1,6 +1,6 @@
 {
   "version": "2.1",
-  "exportTime": "2026-08-01T15:26:53.874Z",
+  "exportTime": "2026-08-02T15:26:42.915Z",
   "lastBackup": "2026-05-06T16:12:05.450Z",
   "logs": [
     {
@@ -21819,6 +21819,24 @@
       ],
       "items": [
         "✅ chore: 自动快照 项目日志与时间统计数据 (2026-07-30) (7ce68e5 · Lynn)"
+      ],
+      "code": null
+    },
+    {
+      "id": "20260801-project-summary",
+      "projectId": "project-summary",
+      "projectName": "项目组织与管理",
+      "date": "2026-08-01",
+      "datetime": "2026-08-01 00:00:00",
+      "title": "⚙️ 维护 - 项目组织与管理",
+      "tags": [
+        {
+          "name": "⚙️ 维护",
+          "type": "chore"
+        }
+      ],
+      "items": [
+        "✅ chore: 自动快照 项目日志与时间统计数据 (2026-08-01) (7c542d6 · Lynn)"
       ],
       "code": null
     }
