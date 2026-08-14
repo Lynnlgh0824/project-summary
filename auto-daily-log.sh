@@ -3,7 +3,7 @@
 # 检测Git变更，智能生成今日工作日志
 
 PROJECT_DIR="/Users/yuzhoudeshengyin/Documents/my_project"
-LOG_DIR="$PROJECT_DIR/project summary"
+LOG_DIR="$PROJECT_DIR/project-summary"
 DATA_FILE="$LOG_DIR/project-log-data.json"
 REPORT_DIR="$LOG_DIR/daily-reports"
 TODAY=$(date +%Y-%m-%d)
@@ -162,7 +162,7 @@ generate_daily_report() {
         case $project in
             "project-organization")
                 project_name="项目组织与管理"
-                project_path="$PROJECT_DIR/project summary"
+                project_path="$PROJECT_DIR/project-summary"
                 ;;
             "english-learning-tts")
                 project_name="英语学习TTS系统"
@@ -170,7 +170,7 @@ generate_daily_report() {
                 ;;
             "chiang-mai-activities")
                 project_name="清迈活动策划"
-                project_path="$PROJECT_DIR/Chiengmai"
+                project_path="$PROJECT_DIR/Chiangmai"
                 ;;
             "aisaas-video")
                 project_name="AI SaaS视频项目"
@@ -226,9 +226,9 @@ main() {
 
     echo "1. 检查项目变更..."
     # 检查各个项目
-    check_git_changes "$PROJECT_DIR/project summary" "项目组织与管理"
+    check_git_changes "$PROJECT_DIR/project-summary" "项目组织与管理"
     check_git_changes "$PROJECT_DIR/english-learning" "英语学习TTS系统"
-    check_git_changes "$PROJECT_DIR/Chiengmai" "清迈活动策划"
+    check_git_changes "$PROJECT_DIR/Chiangmai" "清迈活动策划"
     check_git_changes "$PROJECT_DIR/aisaasvideo" "AI SaaS视频项目"
     check_git_changes "$PROJECT_DIR/clawdbot-railway-template" "Clawdbot Railway模板"
     check_git_changes "$PROJECT_DIR/skills" "技能开发与学习"

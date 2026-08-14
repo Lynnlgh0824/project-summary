@@ -2,10 +2,13 @@
 # 启动项目日志API服务器
 # 用于支持智能生成日志功能
 
-PROJECT_DIR="/Users/yuzhoudeshengyin/Documents/my_project/project summary"
+PROJECT_DIR="/Users/yuzhoudeshengyin/Documents/my_project/project-summary"
 SERVER_SCRIPT="$PROJECT_DIR/auto-log-server.js"
 PID_FILE="$PROJECT_DIR/auto-log-server.pid"
 LOG_FILE="$PROJECT_DIR/auto-log-server.log"
+
+# 解析脚本自身绝对路径，确保 start/stop/restart 自调用时 $0 始终可用
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)/$(basename "${BASH_SOURCE[0]}")"
 
 case "$1" in
     start)
@@ -49,9 +52,9 @@ case "$1" in
         ;;
 
     restart)
-        $0 stop
+        bash "$SCRIPT_PATH" stop
         sleep 1
-        $0 start
+        bash "$SCRIPT_PATH" start
         ;;
 
     status)

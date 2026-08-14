@@ -21,36 +21,39 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
+// 项目根目录：默认取本脚本上级目录（即 my_project），可用环境变量 PROJECT_ROOT 覆盖，避免硬编码绝对路径
+const PROJECT_ROOT = process.env.PROJECT_ROOT || path.resolve(__dirname, '..');
+
 // 项目注册表：键统一使用 data.json 中的规范 projectId
 const REGISTRY = {
     'project-summary': {
         name: '项目组织与管理',
-        path: '/Users/yuzhoudeshengyin/Documents/my_project/project-summary',
+        path: path.join(PROJECT_ROOT, 'project-summary'),
         git: true
     },
     'english-learning': {
         name: '英语学习TTS系统',
-        path: '/Users/yuzhoudeshengyin/Documents/my_project/english-learning',
+        path: path.join(PROJECT_ROOT, 'english-learning'),
         git: true
     },
     'chiangmai': {
         name: '清迈活动策划',
-        path: '/Users/yuzhoudeshengyin/Documents/my_project/Chiangmai',
+        path: path.join(PROJECT_ROOT, 'Chiangmai'),
         git: true
     },
     'aisaasvideo': {
         name: 'AI SaaS视频项目',
-        path: '/Users/yuzhoudeshengyin/Documents/my_project/aisaasvideo',
+        path: path.join(PROJECT_ROOT, 'aisaasvideo'),
         git: true
     },
     'clawdbot-railway-template': {
         name: 'Clawdbot Railway模板',
-        path: '/Users/yuzhoudeshengyin/Documents/my_project/clawdbot-railway-template',
+        path: path.join(PROJECT_ROOT, 'clawdbot-railway-template'),
         git: true
     },
     'skills': {
         name: '技能开发与学习',
-        path: '/Users/yuzhoudeshengyin/Documents/my_project/skills',
+        path: path.join(PROJECT_ROOT, 'skills'),
         git: true
     }
 };
@@ -288,6 +291,31 @@ app.post('/api/logs', (req, res) => {
         res.json({ success: true, entry, total: data.logs.length });
     } catch (error) {
         console.error('手动记一笔失败:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============ API: 待办（todos，统一持久化到 data.json） ============
+// 此前待办只存于浏览器 localStorage，存在跨设备 / 清缓存丢失风险；
+// 现以 data.json.todos 为服务端真相源，前端 localStorage 仅作缓存。
+app.get('/api/todos', (req, res) => {
+    const data = loadData();
+    if (!data.todos) data.todos = {};
+    res.json({ success: true, todos: data.todos });
+});
+
+app.post('/api/todos', (req, res) => {
+    try {
+        const { todos } = req.body || {};
+        if (typeof todos !== 'object' || todos === null || Array.isArray(todos)) {
+            return res.status(400).json({ success: false, error: 'todos 必须是对象' });
+        }
+        const data = loadData();
+        data.todos = todos;
+        saveData(data);
+        res.json({ success: true, total: Object.keys(todos).length });
+    } catch (error) {
+        console.error('保存待办失败:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
